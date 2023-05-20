@@ -1,19 +1,32 @@
-from core.enums import Limits, Tuples
 from django.contrib.auth import get_user_model
 from django.core import validators
-from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 User = get_user_model()
 
 
+class Ingredient(models.Model):
+    """Модель ингредиентов для рецептов."""
+
+    name = models.CharField('Название ингредиента', max_length=200)
+    measurement_unit = models.CharField(verbose_name='Единица измерения',
+                                        max_length=24)
+
+    class Meta:
+        ordering = ('name', )
+        verbose_name = 'Ингредиент'
+        verbose_name_plural = 'Ингредиенты'
+        constraints = [
+            models.UniqueConstraint(fields=['name', 'measurement_unit'],
+                                    name='ingredient_name_unit_unique')
+        ]
+
+    def __str__(self) -> str:
+        return f'{self.name} {self.measurement_unit}'
+
+
 class Tag(models.Model):
-    """
-    Модель тегов для рецептов,
-    связано с Recipe через Many-to-Many
-    """
+    """Модель тегов для рецептов."""
 
     ORANGE = '#FFA500'
     GREEN = '#008000'
@@ -26,45 +39,19 @@ class Tag(models.Model):
     ]
     
     name = models.CharField(max_length=200, unique=True,
-                            db_index=True,
                             verbose_name='Название тега')
     
     color = models.CharField(max_length=7, unique=True,
-                             db_index=False,
                              choices=COLOR_CHOICES,
                              verbose_name='Цвет в HEX')
     
     slug = models.SlugField(max_length=200, unique=True,
-                            db_index=False,
                             verbose_name='Уникальный слаг')
 
     class Meta:
-        ordering = ['-id']
+        ordering = ['name']
         verbose_name = 'Тег'
         verbose_name_plural = 'Теги'
-
-    def __str__(self):
-        return self.name
-
-
-class Ingredient(models.Model):
-    """
-    Модель ингредиентов для рецептов,
-    связано с Recipe через Many-to-Many
-    """
-
-    name = models.CharField(verbose_name='Название ингредиента')
-    measurement_unit = models.CharField(verbose_name='Единица измерения',
-                                        max_length=24)
-
-    class Meta:
-        ordering = ('name', )
-        verbose_name = 'Ингредиент'
-        verbose_name_plural = 'Ингредиенты'
-        constraints = [
-            models.UniqueConstraint(fields=['name', 'measurement_unit'],
-                                    name='unique ingredient')
-        ]
 
     def __str__(self):
         return self.name
@@ -90,14 +77,12 @@ class Recipe(models.Model):
         null=True,
     )
 
-    name = models.CharField(max_length=200, db_index=True,
-                            verbose_name='Название')
+    name = models.CharField(max_length=200, verbose_name='Название')
 
     ingredients = models.ManyToManyField(
         Ingredient,
-        verbose_name='Список ингредиентов',
-        related_name='recipes',
-        through='recipes.AmountIngredient',
+        through='RecipeIngredient',
+        verbose_name='Ингредиенты'
     )
 
     tags = models.ManyToManyField(
@@ -108,7 +93,9 @@ class Recipe(models.Model):
 
     image = models.ImageField(
         verbose_name='Картинка',
-        upload_to='recipe_images/'
+        upload_to='recipes/images/',
+        blank=True,
+        null=True
     )
 
     text = models.TextField(verbose_name='Описание')
@@ -134,60 +121,40 @@ class Recipe(models.Model):
     def __str__(self) -> str:
         return f'{self.name}. Автор: {self.author.username}'
 
-    def save(self, *args, **kwargs) -> None:
-        super().save(*args, **kwargs)
-        image = image.open(self.image.path)
-        image = image.resize(Tuples.RECIPE_IMAGE_SIZE)
-        image.save(self.image.path)
 
-
-class AmountIngredient(models.Model):
-    """
-    Количество ингредиентов в блюде.
-    Модель связывает Recipe и Ingredient с указанием количества ингридиента.
-    """
-
+class RecipeIngredient(models.Model):
+    """Модель для связи рецепта и ингредиента."""
+    
     recipe = models.ForeignKey(
         Recipe,
-        verbose_name = 'В каких рецептах',
-        related_name = 'ingredient',
-        on_delete = models.CASCADE,
+        on_delete=models.CASCADE,
+        related_name='recipe'
     )
-    ingredients = models.ForeignKey(
-        Ingredient,
-        verbose_name = 'Связанные ингредиенты',
-        related_name = 'recipe',
-        on_delete = models.CASCADE,
+    ingredient = models.ForeignKey(
+        'Ingredient',
+        on_delete=models.CASCADE,
+        related_name='ingredient'
     )
     amount = models.PositiveSmallIntegerField(
-        verbose_name = 'Количество',
-        default = 0,
-        validators = (
-            MinValueValidator(
-                Limits.MIN_AMOUNT_INGREDIENTS,
-                'Для готовки нужны ингредиенты',
-            ),
-            MaxValueValidator(
-                Limits.MAX_AMOUNT_INGREDIENTS,
-                'Слишком много ингредиентов!',
-            ),
-        ),
-    )
+        default=1,
+        validators=(
+            validators.MinValueValidator(
+                1, message='Мин. количество ингридиентов 1'),),
+        verbose_name='Количество'
+        )
 
     class Meta:
-        verbose_name = 'Ингридиент'
-        verbose_name_plural = 'Количество ингридиентов'
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
         ordering = ['-id']
-
-    def __str__(self) -> str:
-        return f'{self.amount} {self.ingredients}'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='recipe_ingredient_unique')]
 
 
 class Favorite(models.Model):
-    """
-    Избранные рецепты.
-    Модель связывает Recipe и User.
-    """
+    """Избранные рецепты."""
 
     user = models.ForeignKey(
         User,
@@ -221,7 +188,6 @@ class ShoppingList(models.Model):
     """
     Список покупок, созданный на основе необходимых
     ингредиентов для выбранных рецептов.
-    Модель связывает Recipe и User.
     """
 
     recipe = models.ForeignKey(
@@ -246,6 +212,6 @@ class ShoppingList(models.Model):
                 name='user_shopping_list_unique'
             ),
         )
-    
+
     def __str__(self) -> str:
         return f'{self.user} -> {self.recipe}'
