@@ -2,65 +2,61 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class User(AbstractUser):
+class CustomUser(AbstractUser):
     """
-    Модель пользователя, настроенная под приложение 'Foodgram'.
+    Модель пользователя.
     Все поля обязательны для заполнения.
     """
 
-    username = models.CharField(
-        verbose_name='Уникальный юзернейм',
-        max_length=50,
-        unique=True)
     email = models.EmailField(
-        'Email',
-        max_length=200,
-        unique=True)
+        max_length=254,
+        unique=True,
+        verbose_name='Адрес электронной почты'
+    )
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        verbose_name='Уникальный юзернейм'
+    )
     first_name = models.CharField(
-        'Имя',
-        max_length=150)
+        max_length=150,
+        verbose_name='Имя'
+    )
     last_name = models.CharField(
-        'Фамилия',
-        max_length=150)
+        max_length=150,
+        verbose_name='Фамилия'
+    )
     password = models.CharField(
-        verbose_name='Пароль',
-        max_length=128
+        max_length=150,
+        verbose_name='Пароль'
     )
 
     class Meta:
-        verbose_name = 'Пользователь'
-        verbose_name_plural = 'Пользователи'
-        ordering = ('username',)
+        verbose_name='Пользователь',
+        verbose_name_plural='Пользователи',
+        ordering = ['username']
 
-    def __str__(self) -> str:
-        return f'{self.username}: {self.email}'
+    def __str__(self):
+        return self.username
 
 
 class Subscription(models.Model):
-    """Подписки пользователей друг на друга."""
+    """Подписки на пользователей."""
+
     user = models.ForeignKey(
-        User,
-        related_name='follower',
+        CustomUser,
+        related_name='subscriber',
         verbose_name='Подписчик',
         on_delete=models.CASCADE
     )
     author = models.ForeignKey(
-        User,
-        related_name='author',
+        CustomUser,
+        related_name='subscribing',
         verbose_name='Автор',
         on_delete=models.CASCADE
     )
 
-    class Meta:
+    class Meta():
+        verbose_name='Подписка',
+        verbose_name_plural='Подписки',
         ordering = ['-id']
-        verbose_name = 'Подписка'
-        verbose_name_plural = 'Подписки'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'author'],
-                name='unique_subscription',
-            )
-        ]
-
-    def __str__(self):
-        return f'Пользователь {self.user} подписался на {self.author}'
