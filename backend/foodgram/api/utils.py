@@ -13,8 +13,6 @@ class PostDeleteMixin:
             favorite = model.objects.create(user=request.user, recipe=recipe)
             serializer = model_serializer(favorite,
                                           context={'request': request})
-
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
         model.objects.filter(user=request.user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
