@@ -32,8 +32,8 @@ class CustomUser(AbstractUser):
     )
 
     class Meta:
-        verbose_name='Пользователь',
-        verbose_name_plural='Пользователи',
+        verbose_name = 'Пользователь',
+        verbose_name_plural = 'Пользователи',
         ordering = ['username']
 
     def __str__(self):
@@ -57,8 +57,8 @@ class Subscription(models.Model):
     )
 
     class Meta():
-        verbose_name='Подписка',
-        verbose_name_plural='Подписки',
+        verbose_name = 'Подписка',
+        verbose_name_plural = 'Подписки',
         ordering = ['-id']
         constraints = [
             models.UniqueConstraint(

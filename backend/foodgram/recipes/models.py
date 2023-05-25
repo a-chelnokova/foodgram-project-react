@@ -20,15 +20,15 @@ class Tag(models.Model):
     name = models.CharField(max_length=50, unique=True,
                             verbose_name='Название тега')
 
-    color =models.CharField(max_length=50, choices=COLOR_CHOICES,
-                            verbose_name='Цвет')
-    
+    color = models.CharField(max_length=50, choices=COLOR_CHOICES,
+                             verbose_name='Цвет')
+
     slug = models.SlugField(max_length=50, unique=True,
                             db_index=True, verbose_name='Слаг')
 
     class Meta:
-        verbose_name='Тег',
-        verbose_name_plural='Теги',
+        verbose_name = 'Тег',
+        verbose_name_plural = 'Теги',
         ordering = ['name']
 
     def __str__(self):
@@ -45,8 +45,8 @@ class Ingredient(models.Model):
                                         verbose_name='Единица измерения')
 
     class Meta:
-        verbose_name='Ингредиент',
-        verbose_name_plural='Ингредиенты',
+        verbose_name = 'Ингредиент',
+        verbose_name_plural = 'Ингредиенты',
         ordering = ['name']
 
     def __str__(self):
@@ -70,8 +70,8 @@ class RecipeIngredient(models.Model):
     )
 
     class Meta:
-        verbose_name='Количество ингредиента',
-        verbose_name_plural='Количество ингредиентов',
+        verbose_name = 'Количество ингредиента',
+        verbose_name_plural = 'Количество ингредиентов',
         ordering = ['ingredient']
         constraints = [
             models.UniqueConstraint(fields=['recipe', 'ingredient'],
@@ -109,14 +109,15 @@ class Recipe(models.Model):
         ],
         help_text='Время приготовления в минутах')
 
-    image = models.ImageField(verbose_name='Картинка', upload_to='recipes/images/')
+    image = models.ImageField(verbose_name='Картинка',
+                              upload_to='recipes/images/')
 
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
                                verbose_name='Автор', related_name='recipes')
 
     class Meta:
-        verbose_name='Рецепт',
-        verbose_name_plural='Рецепты',
+        verbose_name = 'Рецепт',
+        verbose_name_plural = 'Рецепты',
         ordering = ['-pub_date']
         constraints = [
             models.UniqueConstraint(fields=['name', 'author'],
@@ -138,8 +139,8 @@ class Favorite(models.Model):
                                related_name='in_favourites')
 
     class Meta:
-        verbose_name='Избранный рецепт',
-        verbose_name_plural='Избранные рецепты',
+        verbose_name = 'Избранный рецепт',
+        verbose_name_plural = 'Избранные рецепты',
         ordering = ['-id']
         constraints = [
             models.UniqueConstraint(
@@ -163,8 +164,8 @@ class ShoppingCart(models.Model):
                                related_name='in_shopping_cart')
 
     class Meta:
-        verbose_name='Рецепт в списке покупок',
-        verbose_name_plural='Рецепты в списке покупок'
+        verbose_name = 'Рецепт в списке покупок',
+        verbose_name_plural = 'Рецепты в списке покупок'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'], name='unique_shopping_cart'

@@ -6,7 +6,7 @@ from recipes.models import Recipe
 
 
 class PostDeleteMixin:
-    def post_delete(model, model_serializer, request, id):
+    def post_delete(self, model, model_serializer, request, id):
         recipe = get_object_or_404(Recipe, id=id)
 
         if request.method == 'POST':

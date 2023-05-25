@@ -124,9 +124,11 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, ingredients):
         ing_ids = [ingredient['id'] for ingredient in ingredients]
-        
+
         if len(ing_ids) != len(set(ing_ids)):
-            raise serializers.ValidationError('Нельзя дублировать ингредиенты.')
+            raise serializers.ValidationError(
+                'Нельзя дублировать ингредиенты.'
+            )
         return ingredients
 
     def create(self, validated_data):
@@ -147,9 +149,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         instance.tags = validated_data.get('tags', instance.tags)
+        ingredients = validated_data.pop('ingredients')
 
         if ingredients in validated_data:
-            ingredients = validated_data.pop('ingredients')
 
             for ingredient in ingredients:
                 RecipeIngredient.objects.update_or_create(

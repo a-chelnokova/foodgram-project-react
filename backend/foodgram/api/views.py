@@ -43,12 +43,13 @@ class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
             permission_classes=[AuthorOrReadOnly])
     def favorite(self, request, id):
-        return self.post_delete(Favorite, FavoriteSerializer, request, id)
+        return self.post_delete(self, Favorite, FavoriteSerializer,
+                                request, id)
 
     @action(detail=True, methods=['POST', 'DELETE'], url_path='shopping_cart',
             permission_classes=[AuthorOrReadOnly])
     def shopping_cart(self, request, id):
-        return self.post_delete(ShoppingCart, ShoppingCartSerializer,
+        return self.post_delete(self, ShoppingCart, ShoppingCartSerializer,
                                 request, id)
 
     @action(detail=False, methods=['GET'])
