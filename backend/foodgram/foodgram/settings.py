@@ -11,7 +11,7 @@ DATE_TIME_FORMAT = '%d/%m/%Y %H:%M'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-lcigsfv9s2-nnhs3u55x%%*!++h&=%hqttk$w#khm(@@-+_fjh')
+SECRET_KEY = os.getenv('SECRET_KEY', default='p&l%385148kslhtyn^##a1)ilz@4zqj=rq&agdol^##zgl9(vs')
 
 
 DEBUG = False
