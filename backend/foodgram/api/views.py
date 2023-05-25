@@ -1,15 +1,16 @@
+from django.db.models import Sum
+from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, viewsets
+from rest_framework.decorators import action
+
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipeSerializer, ShoppingCartSerializer,
                              TagSerializer)
 from api.utils import PostDeleteMixin
-from django.db.models import Sum
-from django.http import HttpResponse
-from django_filters.rest_framework import DjangoFilterBackend
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
-from rest_framework import filters, viewsets
-from rest_framework.decorators import action
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -39,19 +40,16 @@ class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
     filterset_fields = ('name', 'author', 'tags', 'cooking_time')
     search_fields = ('name',)
 
-
     @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
             permission_classes=[AuthorOrReadOnly])
     def favorite(self, request, id):
         return self.post_delete(Favorite, FavoriteSerializer, request, id)
-
 
     @action(detail=True, methods=['POST', 'DELETE'], url_path='shopping_cart',
             permission_classes=[AuthorOrReadOnly])
     def shopping_cart(self, request, id):
         return self.post_delete(ShoppingCart, ShoppingCartSerializer,
                                 request, id)
-
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
