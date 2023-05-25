@@ -71,11 +71,14 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:v1
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:v1
             sudo docker-compose stop
             sudo docker-compose rm backend
-            sudo docker-compose rm frontend
-            sudo touch .env
+            rm .env
+            touch .env
             echo DB_ENGINE=${{ secrets.DB_ENGINE }} >> .env
+            echo DEBUG=${{ secrets.DEBUG }} >> .env
             echo DB_NAME=${{ secrets.DB_NAME }} >> .env
             echo POSTGRES_USER=${{ secrets.POSTGRES_USER }} >> .env
             echo POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }} >> .env
