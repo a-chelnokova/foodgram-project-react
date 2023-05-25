@@ -44,7 +44,7 @@ jobs:
             password: ${{ secrets.DOCKER_PASSWORD }}
 
         - name: Push frontend to Docker Hub
-          uses: docker/build-push-action@v2
+          uses: docker/build-push-action@v3
           with:
             context: ./frontend
             file: ./frontend/Dockerfile
@@ -52,7 +52,7 @@ jobs:
             tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
 
         - name: Push backend to Docker Hub
-          uses: docker/build-push-action@v2
+          uses: docker/build-push-action@v3
           with:
             context: ./backend
             file: ./backend/Dockerfile
