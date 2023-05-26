@@ -10,6 +10,7 @@ services:
 
   backend:
     image: kleweta/foodgram_backend:latest
+    tty: true
     volumes:
       - static_value:/app/static/
       - media_value:/app/media/
