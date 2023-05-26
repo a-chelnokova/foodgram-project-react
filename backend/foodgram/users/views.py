@@ -35,6 +35,7 @@ class SubscriptionViewSet(views.APIView):
 class SubscriptionListViewSet(generics.ListAPIView):
     """Вьюсет для отображения подписок пользователя."""
 
+    permission_classes = [IsAuthenticated]
     serializer_class = ShowSubscriptionSerializer
 
     def get_queryset(self):
