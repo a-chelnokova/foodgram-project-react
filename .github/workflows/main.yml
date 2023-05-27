@@ -55,7 +55,7 @@ jobs:
           uses: docker/build-push-action@v3
           with:
             context: ./backend
-            file: ./backend/Dockerfile
+            file: ./backend/foodgram/Dockerfile
             push: true
             tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
 
