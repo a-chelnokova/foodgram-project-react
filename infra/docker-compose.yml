@@ -27,7 +27,7 @@ services:
       - backend
 
   nginx:
-    image: nginx:1.18.0
+    image: nginx:1.18.0-alpine
     restart: always
     ports:
       - 80:80
