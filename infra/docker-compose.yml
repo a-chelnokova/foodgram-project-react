@@ -30,7 +30,7 @@ services:
     image: nginx:1.18.0-alpine
     restart: always
     ports:
-      - 80:80
+      - "80:80"
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d
       - ../frontend/build:/usr/share/nginx/html/
