@@ -28,6 +28,7 @@ services:
 
   nginx:
     image: nginx:1.18.0
+    restart: always
     ports:
       - 80:80
     volumes:
