@@ -19,7 +19,7 @@ urlpatterns = [
     path('', include('djoser.urls')),
     path('auth/', include('djoser.urls.authtoken')),
     path('users/', ListCreateAPIView.as_view(), name='users'),
-    path('users/', RetrieveUpdateDestroyUserView.as_view(), name='users'), 
+    path('users/', RetrieveUpdateDestroyUserView.as_view(), name='users'),
     path('users/subscriptions', SubscriptionListViewSet.as_view(),
          name='users/subscriptions'),
 ]

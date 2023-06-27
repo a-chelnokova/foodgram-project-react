@@ -19,14 +19,13 @@ class ListCreateUserView(ListCreateAPIView):
     Обрабатывает GET и POST запросы.
     """
 
-    queryset=CustomUser.objects.all()
+    queryset = CustomUser.objects.all()
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return CustomUserCreateSerializer
         else:
             return CustomUserSerializer
-
 
     def perform_create(self, serializer):
         serializer.save()
@@ -38,9 +37,9 @@ class RetrieveUpdateDestroyUserView(RetrieveUpdateDestroyAPIView):
     Обрабатывает запросы GET, PUT, PATCH и DELETE.
     """
 
-    queryset=CustomUser.objects.all()
-    serializer_class=CustomUserSerializer
-    permission_classes=[AuthorOrReadOnly]
+    queryset = CustomUser.objects.all()
+    serializer_class = CustomUserSerializer
+    permission_classes = [AuthorOrReadOnly]
 
 
 class SubscriptionViewSet(views.APIView):
