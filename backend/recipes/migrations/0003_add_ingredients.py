@@ -1,36 +1,21 @@
-from django.db import migrations, IntegrityError, transaction
-
 import json
-
-
-def make_ings_dict(ingredient):
-    fields = {
-        'name': None,
-        'measurement_unit': None
-    }
-
-    for key, value in ingredient.items():
-        fields[key] = value
-    return fields
+from django.db import migrations
+from django.db import transaction
 
 
 def add_ings(apps, schema_editor):
     Ingredient = apps.get_model('recipes', 'Ingredient')
-    db_alias = schema_editor.connection.alias
+    json_file_path = ('data/ingredients.json')
 
-    with open('ingredients.json', encoding='utf-8') as file:
-        ingredients = json.load(file)
-        for ingredient in ingredients:
-            try:
-                fields = make_ings_dict(ingredient)
+    with open(json_file_path, encoding='utf-8') as file:
+        data = json.load(file)
 
-                with transaction.atomic():
-                    Ingredient.objects.using(db_alias).create(
-                        name=fields['name'],
-                        measurement_unit=fields['measurement_unit']
-                    )
-            except IntegrityError:
-                continue
+        with transaction.atomic():
+            for item in data:
+                ingredient = Ingredient.objects.get_or_create(
+                    name=item['name'],
+                    measurement_unit=item['measurement_unit']
+                )
 
 
 class Migration(migrations.Migration):
