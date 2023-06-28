@@ -40,6 +40,11 @@ class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
     filterset_fields = ('name', 'author', 'tags', 'cooking_time')
     search_fields = ('name',)
 
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
+
     @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
             permission_classes=[AuthorOrReadOnly])
     def favorite(self, request, id):

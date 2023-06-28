@@ -3,7 +3,7 @@ from django.db import IntegrityError, transaction
 
 from api.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
+                            ShoppingCart, Tag, RecipeTag)
 from users.models import CustomUser, Subscription
 
 
@@ -130,7 +130,9 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     ingredients = RecipeIngredientSerializer(many=True)
     image = Base64ImageField()
-    tags = TagSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(), many=True
+    )
     author = CustomUserSerializer()
 
     is_favorited = serializers.SerializerMethodField()
@@ -160,14 +162,17 @@ class RecipeSerializer(serializers.ModelSerializer):
         author = self.context['request'].user
 
         recipe = Recipe.objects.create(**validated_data,
-                                       author=author,
-                                       tags=tags)
+                                       author=author)
 
         RecipeIngredient.objects.bulk_create([RecipeIngredient(
             ingredient=ingredient['ingredient'],
             recipe=recipe,
             amount=ingredient['amount'])
             for ingredient in ingredients])
+
+        for tag in tags:
+            RecipeTag.objects.create(recipe=recipe, tag=tag)
+
         return recipe
 
     def update(self, instance, validated_data):
