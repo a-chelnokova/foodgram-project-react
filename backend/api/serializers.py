@@ -20,7 +20,13 @@ class CustomUserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = '__all__'
+        fields = fields = [
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'password'
+        ]
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
