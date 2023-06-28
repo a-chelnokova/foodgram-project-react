@@ -88,7 +88,6 @@ class RecipeTag(models.Model):
                             related_name='tag',
                             verbose_name='Тег')
 
-
     class Meta:
         constraints = [
             models.UniqueConstraint(fields=['recipe', 'tag'],
