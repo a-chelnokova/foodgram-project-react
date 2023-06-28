@@ -1,10 +1,10 @@
 from rest_framework import serializers
 
 from api.fields import Base64ImageField
+from api.utils import UserCreateMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import CustomUser, Subscription
-from utils import UserCreateMixin
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
