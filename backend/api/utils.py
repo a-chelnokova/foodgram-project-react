@@ -2,7 +2,10 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 
+from django.db import IntegrityError, transaction
+
 from recipes.models import Recipe
+from users.models import CustomUser
 
 
 class PostDeleteMixin:
@@ -16,3 +19,17 @@ class PostDeleteMixin:
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         model.objects.filter(user=request.user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserCreateMixin:
+    def create(self, validated_data):
+        try:
+            user = self.perform_create(validated_data)
+        except IntegrityError:
+            self.fail('cannot_create')
+        return user
+
+    def perform_create(self, validated_data):
+        with transaction.atomic():
+            user = CustomUser.objects.create_user(**validated_data)
+        return user
