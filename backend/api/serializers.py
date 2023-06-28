@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db import IntegrityError, transaction
 
 from api.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
@@ -15,7 +16,23 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         read_only_fields = '__all__'
 
 
-class CustomUserCreateSerializer(serializers.ModelSerializer):
+class UserCreateMixin:
+    def create(self, validated_data):
+        try:
+            user = self.perform_create(validated_data)
+        except IntegrityError:
+            self.fail('cannot_create')
+        return user
+
+    def perform_create(self, validated_data):
+        with transaction.atomic():
+            user = CustomUser.objects.create_user(**validated_data)
+        return user
+
+
+class CustomUserCreateSerializer(
+    UserCreateMixin,
+    serializers.ModelSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
     class Meta:
