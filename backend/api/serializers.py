@@ -30,9 +30,8 @@ class UserCreateMixin:
         return user
 
 
-class CustomUserCreateSerializer(
-    UserCreateMixin,
-    serializers.ModelSerializer):
+class CustomUserCreateSerializer(UserCreateMixin,
+                                 serializers.ModelSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
     class Meta:
