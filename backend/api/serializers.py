@@ -97,23 +97,10 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RecipeIngredientSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели RecipeIngredient."""
-
-    ingredient = IngredientSerializer()
-    measurement_unit = IngredientSerializer(
-        source='ingredient.measurement_unit'
-    )
-
-    class Meta:
-        model = RecipeIngredient
-        fields = ('ingredient', 'amount', 'measurement_unit')
-
-
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe."""
 
-    ingredients = RecipeIngredientSerializer(many=True)
+    ingredients = IngredientSerializer(many=True)
     image = Base64ImageField()
     tags = TagSerializer(many=True)
     author = CustomUserSerializer()
