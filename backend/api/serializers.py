@@ -113,7 +113,9 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe."""
 
-    ingredients = RecipeIngredientSerializer(many=True)
+    ingredients = RecipeIngredientSerializer(
+        many=True,
+        source='recipeingredient_set')
     image = Base64ImageField()
     tags = TagSerializer(many=True)
     author = CustomUserSerializer()
