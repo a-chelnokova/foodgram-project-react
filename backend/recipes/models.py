@@ -57,9 +57,10 @@ class RecipeIngredient(models.Model):
     """Необходимое количество ингредиентов."""
 
     recipe = models.ForeignKey('Recipe', on_delete=models.CASCADE,
-                               verbose_name='Рецепт')
+                               related_name='recipe', verbose_name='Рецепт')
 
     ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE,
+                                   related_name='ingredient',
                                    verbose_name='Ингредиент')
 
     amount = models.PositiveSmallIntegerField(
@@ -75,29 +76,6 @@ class RecipeIngredient(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['recipe', 'ingredient'],
                                     name='recipe_ingredient_unique')]
-
-
-class RecipeTag(models.Model):
-    """Модель для связи тега и рецепта."""
-
-    recipe = models.ForeignKey(
-        'Recipe',
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт'
-    )
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.CASCADE,
-        verbose_name='Тег'
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['recipe', 'tag'],
-                name='recipe_tag_unique'
-            )
-        ]
 
 
 class Recipe(models.Model):
