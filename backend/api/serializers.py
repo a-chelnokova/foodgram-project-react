@@ -1,4 +1,3 @@
-from django.db.models import F
 from rest_framework import serializers
 
 from api.fields import Base64ImageField
@@ -111,100 +110,78 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ('ingredient', 'amount', 'measurement_unit')
 
 
-class RecipeReadSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True)
-    author = CustomUserSerializer()
-    ingredients = serializers.SerializerMethodField()
-    is_favorited = serializers.BooleanField(default=False)
-    is_in_shopping_cart = serializers.BooleanField(default=False)
+class RecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Recipe."""
 
-    class Meta:
-        model = Recipe
-        fields = ('id', 'tags', 'author', 'ingredients',
-                  'is_favorited', 'is_in_shopping_cart', 'name', 'image',
-                  'text', 'cooking_time',)
-
-    def get_ingredients(self, obj):
-        return obj.ingredients.values(
-            'id', 'name', 'measurement_unit', amount=F('recipe__amount')
-        )
-
-
-class RecipeWriteSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(many=True, read_only=True)
     ingredients = RecipeIngredientSerializer(many=True)
     image = Base64ImageField()
+    tags = TagSerializer(many=True)
+    author = CustomUserSerializer()
+
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        fields = ('author', 'tags', 'ingredients', 'name',
-                  'image', 'text', 'cooking_time')
 
-    def get_ingredients(self, obj):
-        return obj.ingredients.values(
-            'id', 'name', 'measurement_unit', amount=F('recipe__amount')
-        )
+        fields = ('pub_date', 'name', 'ingredients', 'tags', 'text',
+                  'cooking_time', 'image', 'author',
+                  'is_favorited', 'is_in_shopping_cart')
 
-    def validate(self, data):
-        ingredients = data.get('ingredients', None)
-        ingredients_set = set()
-        for ingredient in ingredients:
-            if type(ingredient.get('amount')) is str:
-                if not ingredient.get('amount').isdigit():
-                    raise serializers.ValidationError(
-                        ('Количество ингредиента должно быть числом')
-                    )
-            if int(ingredient.get('amount')) <= 0:
-                raise serializers.ValidationError(
-                    ('Минимальное количество ингридиентов 1')
-                )
-            if int(data['cooking_time']) <= 0:
-                raise serializers.ValidationError(
-                    'Время готовки должно быть > 0 '
-                )
-            ingredient_id = ingredient.get('id')
-            if ingredient_id in ingredients_set:
-                raise serializers.ValidationError(
-                    'Ингредиент не должен повторяться.'
-                )
-            ingredients_set.add(ingredient_id)
-        data['ingredients'] = ingredients
-        return data
+        read_only_fields = ('author',)
 
-    def add_tags_ingredients(self, instance, **validated_data):
-        ingredients = validated_data['ingredients']
-        tags = validated_data['tags']
-        for tag in tags:
-            instance.tags.add(tag)
+    def validate_ingredients(self, ingredients):
+        ing_ids = [ingredient['id'] for ingredient in ingredients]
 
-        for ingredient in ingredients:
-            RecipeIngredient.objects.create(
-                recipe=instance,
-                ingredients_id=ingredient.get('id'),
-                amount=ingredient.get('amount'))
-        return instance
+        if len(ing_ids) != len(set(ing_ids)):
+            raise serializers.ValidationError(
+                'Нельзя дублировать ингредиенты.'
+            )
+        return ingredients
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
-        tags = self.initial_data.get('tags')
-        recipe = Recipe.objects.create(
-            **validated_data,
-            author=self.context.get('request').user
-        )
-        return self.add_tags_ingredients(
-            recipe, ingredients=ingredients, tags=tags)
+        tags = validated_data.pop('tags')
+        author = self.context['request'].user
+
+        recipe = Recipe.objects.create(**validated_data,
+                                       author=author,
+                                       tags=tags)
+
+        RecipeIngredient.objects.bulk_create([RecipeIngredient(
+            ingredient=ingredient['ingredient'],
+            recipe=recipe,
+            amount=ingredient['amount'])
+            for ingredient in ingredients])
+        return recipe
 
     def update(self, instance, validated_data):
-        instance.cooking_time = validated_data.get(
-            'cooking_time', instance.cooking_time
-        )
-        instance.ingredients.clear()
-        instance.tags.clear()
+        instance.tags = validated_data.get('tags', instance.tags)
         ingredients = validated_data.pop('ingredients')
-        tags = self.initial_data.get('tags')
-        instance = self.add_tags_ingredients(
-            instance, ingredients=ingredients, tags=tags)
+
+        if ingredients in validated_data:
+
+            for ingredient in ingredients:
+                RecipeIngredient.objects.update_or_create(
+                    recipe=instance,
+                    ingredient=ingredient,
+                    amount=ingredient.get('amount')
+                )
         return super().update(instance, validated_data)
+
+    def get_is_favorited(self, obj):
+        user = self.context['request'].user
+
+        if user.is_anonymous:
+            return False
+        return Favorite.objects.filter(recipe=obj, user=user).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        user = self.context['request'].user
+
+        if user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(recipe=obj, user=user).exists()
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
