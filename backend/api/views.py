@@ -35,11 +35,13 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
     """Вьюсет для модели Recipe."""
 
-    queryset = Recipe.objects.all()
     permission_classes = [AuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('name', 'author', 'tags', 'cooking_time')
     search_fields = ('name',)
+
+    def get_queryset(self):
+        return Recipe.objects.filter(author__is_active=True)
 
     def get_serializer_class(self):
         if self.request.method == 'GET':
