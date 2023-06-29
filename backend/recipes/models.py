@@ -85,17 +85,14 @@ class Recipe(models.Model):
                                     auto_now_add=True)
 
     name = models.CharField(max_length=50, unique=True,
-                            verbose_name='Название рецепта',
-                            help_text='Название рецепта')
+                            verbose_name='Название рецепта')
 
     ingredients = models.ManyToManyField(Ingredient,
                                          through=RecipeIngredient,
                                          related_name='recipes',
-                                         verbose_name='Ингредиенты',
-                                         help_text='Необходимые ингредиенты')
+                                         verbose_name='Ингредиенты')
 
-    tags = models.ManyToManyField(Tag, verbose_name='Теги',
-                                  help_text='Выберите теги',
+    tags = models.ManyToManyField(Tag, verbose_name='Тег',
                                   related_name='recipes')
 
     text = models.TextField(verbose_name='Текст рецепта',
@@ -106,8 +103,7 @@ class Recipe(models.Model):
         default=1,
         validators=[
             MinValueValidator(1, message='Минимальное время 1 минута'),
-        ],
-        help_text='Время приготовления в минутах')
+        ])
 
     image = models.ImageField(verbose_name='Картинка',
                               upload_to='recipes/images/')

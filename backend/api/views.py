@@ -20,7 +20,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
     serializer_class = IngredientSerializer
     filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
+    search_fields = ('^name',)
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
@@ -28,8 +28,8 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     pagination_class = None
     serializer_class = TagSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
+    #filter_backends = (filters.SearchFilter,)
+    #search_fields = ('name',)
 
 
 class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
