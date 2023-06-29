@@ -85,9 +85,12 @@ class TagSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Tag."""
 
     class Meta:
+        model = Tag
         fields = ('id', 'name', 'color', 'slug')
         read_only_fields = ('id', 'slug')
-        model = Tag
+
+    def create(self, validated_data):
+        return Tag.objects.get(id=validated_data)
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -105,7 +108,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RecipeIngredient
-        fields = ['id', 'amount']
+        fields = ('id', 'amount')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
