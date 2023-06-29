@@ -125,8 +125,6 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'cooking_time', 'image', 'author',
                   'is_favorited', 'is_in_shopping_cart')
 
-        read_only_fields = ('author',)
-
     def validate_ingredients(self, ingredients):
         ing_ids = [ingredient['id'] for ingredient in ingredients]
 
