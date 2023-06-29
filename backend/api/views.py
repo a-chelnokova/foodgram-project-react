@@ -36,7 +36,7 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
 
 
-class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
+class RecipeViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Recipe."""
 
     permission_classes = [AuthorOrReadOnly, ]
