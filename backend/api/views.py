@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipeSerializer, ShoppingCartSerializer,
-                             TagSerializer)
+                             TagSerializer, CreateRecipeSerializer)
 from api.utils import PostDeleteMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
@@ -36,11 +36,20 @@ class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
     """Вьюсет для модели Recipe."""
 
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
     permission_classes = [AuthorOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     filterset_fields = ('name', 'author', 'tags', 'cooking_time')
     search_fields = ('name',)
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeSerializer
+        return CreateRecipeSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
 
     @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
             permission_classes=[AuthorOrReadOnly])
