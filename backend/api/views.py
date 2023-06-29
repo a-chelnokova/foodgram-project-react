@@ -3,8 +3,10 @@ from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from api.filters import IngredientFilter, RecipeFilter
+from api.pagination import CustomPagination
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipeSerializer, ShoppingCartSerializer,
@@ -17,32 +19,32 @@ from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Ingredient."""
 
-    queryset = Ingredient.objects.all()
+    permission_classes = [AllowAny, ]
     pagination_class = None
     serializer_class = IngredientSerializer
+    queryset = Ingredient.objects.all()
     filter_backends = [IngredientFilter, ]
-    search_fields = ('name',)
+    search_fields = ['^name', ]
 
 
 class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Tag."""
-    queryset = Tag.objects.all()
+
+    permission_classes = [AllowAny, ]
     pagination_class = None
     serializer_class = TagSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('name',)
+    queryset = Tag.objects.all()
 
 
 class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
     """Вьюсет для модели Recipe."""
 
+    permission_classes = [AuthorOrReadOnly, ]
+    pagination_class = CustomPagination
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
-    permission_classes = [AuthorOrReadOnly]
-    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
-    filterset_fields = ('name', 'author', 'tags', 'cooking_time')
-    search_fields = ('name',)
+    serializer_class = RecipeSerializer
 
     @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
             permission_classes=[AuthorOrReadOnly])
