@@ -76,6 +76,9 @@ class ShowSubscriptionSerializer(serializers.ModelSerializer):
         if request.user.is_anonymous or request is None:
             return False
         recipes = Recipe.objects.filter(author=obj)
+        limit = request.query_params.get('recipes_limit')
+        if limit:
+            recipes = recipes[:int(limit)]
         return ShortRecipeSerializer(recipes, many=True,
                                      context={'request': request}).data
 
@@ -88,8 +91,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         fields = ('user', 'author')
 
     def to_representation(self, instance):
-        return ShowSubscriptionSerializer(instance.author, read_only=True,
-                                          many=True,
+        return ShowSubscriptionSerializer(instance.author,
                                           context={'request':
                                                    self.context.get('request')
                                                    }).data
