@@ -35,12 +35,12 @@ class CustomUserCreateSerializer(UserCreateMixin,
 class CustomUserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели CustomUser."""
 
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'username', 'first_name', 'last_name',
-                  'is_subscribed')
+        fields = ('id', 'email', 'username',
+                  'first_name', 'last_name', 'is_subscribed')
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
