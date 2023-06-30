@@ -188,7 +188,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return ingredients
 
     def create(self, validated_data):
-        ingredients = validated_data.pop('ingredients')
+        # ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         author = self.context.get('request').user
 
