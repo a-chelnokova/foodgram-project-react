@@ -17,12 +17,12 @@ class RecipeFilter(filter.FilterSet):
         to_field_name='slug'
     )
     is_favorited = filter.NumberFilter(method='get_favorite')
-    is_in_shopping_cart = filter.NumberFilter(
+    in_shopping_cart = filter.NumberFilter(
         method='get_in_shopping_cart')
 
     class Meta:
         model = Recipe
-        fields = ['tags', 'author', 'is_favorited', 'get_in_shopping_cart']
+        fields = ['tags', 'author', 'is_favorited', 'in_shopping_cart']
 
     def get_favorite(self, queryset, name, value):
         if value:
