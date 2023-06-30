@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
@@ -11,7 +11,7 @@ from api.permissions import AuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipeSerializer, ShoppingCartSerializer,
                              TagSerializer, CreateRecipeSerializer)
-from api.utils import PostDeleteMixin
+from api.utils import PostDeleteMixin, process_recipe_saving
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 
@@ -56,16 +56,16 @@ class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
         return context
 
     @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
-            permission_classes=[AuthorOrReadOnly])
-    def favorite(self, request, id):
-        return self.post_delete(self, Favorite, FavoriteSerializer,
-                                request, id)
+            permission_classes=[IsAuthenticated])
+    def favorite(self, request, pk):
+        return process_recipe_saving(request, pk,
+                                     FavoriteSerializer, Favorite)
 
     @action(detail=True, methods=['POST', 'DELETE'], url_path='shopping_cart',
-            permission_classes=[AuthorOrReadOnly])
-    def shopping_cart(self, request, id):
-        return self.post_delete(self, ShoppingCart, ShoppingCartSerializer,
-                                request, id)
+            permission_classes=[IsAuthenticated])
+    def shopping_cart(self, request, pk):
+        return process_recipe_saving(request, pk,
+                                     ShoppingCartSerializer, ShoppingCart)
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):

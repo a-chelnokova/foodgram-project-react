@@ -32,3 +32,21 @@ class UserCreateMixin:
         with transaction.atomic():
             user = CustomUser.objects.create_user(**validated_data)
         return user
+
+
+def process_recipe_saving(request, pk, serializer, model):
+    recipe = get_object_or_404(Recipe, id=pk)
+    if request.method == "POST":
+        serializer = serializer(
+            data={
+                "recipe": recipe.id,
+                "user": request.user.id,
+            },
+            context={"request": request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    model.objects.filter(recipe=recipe, user=request.user).delete()
+    return Response(status=status.HTTP_204_NO_CONTENT)

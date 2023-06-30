@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.shortcuts import get_object_or_404
 
 from api.fields import Base64ImageField
 from api.utils import UserCreateMixin, PostDeleteMixin
@@ -236,7 +237,12 @@ class FavoriteSerializer(serializers.ModelSerializer):
 class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для модели ShoppingCart."""
 
-    recipe = ShortRecipeSerializer()
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    recipe = serializers.HiddenField(default=None)
+
+    def validate_recipe(self, value):
+        recipe_id = self.context['request'].parser_context['kwargs']['pk']
+        return get_object_or_404(Recipe, pk=recipe_id)
 
     class Meta:
         model = ShoppingCart
