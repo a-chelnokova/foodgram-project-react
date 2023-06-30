@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from api.fields import Base64ImageField
-from api.utils import UserCreateMixin
+from api.utils import UserCreateMixin, PostDeleteMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag, RecipeTag)
 from users.models import CustomUser, Subscription
@@ -108,7 +108,8 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'amount')
 
 
-class RecipeSerializer(serializers.ModelSerializer):
+class RecipeSerializer(PostDeleteMixin,
+                       serializers.ModelSerializer):
     """Сериализатор для модели Recipe."""
 
     tags = TagSerializer(many=True)
