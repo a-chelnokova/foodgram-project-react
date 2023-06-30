@@ -139,27 +139,28 @@ class RecipeSerializer(PostDeleteMixin,
     class Meta:
         model = Recipe
 
-        fields = ('pub_date', 'name', 'ingredients', 'tags', 'text',
-                  'cooking_time', 'image', 'author',
-                  'is_favorited', 'is_in_shopping_cart')
+        fields = ('id', 'tags', 'author', 'ingredients',
+                  'is_favorited', 'is_in_shopping_cart',
+                  'name', 'image', 'text', 'cooking_time')
 
     def get_ingredients(self, obj):
         ingredients = RecipeIngredient.objects.filter(recipe=obj)
         return RecipeIngredientSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
-        user = self.context['request'].user
-
-        if user.is_anonymous:
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
             return False
-        return Favorite.objects.filter(recipe=obj, user=user).exists()
+        return Favorite.objects.filter(
+            user=request.user, recipe_id=obj
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
             return False
         return ShoppingCart.objects.filter(
-            user=request.user, recipe=obj).exists()
+            user=request.user, recipe_id=obj).exists()
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
