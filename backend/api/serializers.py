@@ -89,9 +89,6 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'color', 'slug')
         read_only_fields = ('id', 'slug')
 
-    def create(self, validated_data):
-        return Tag.objects.get(id=validated_data)
-
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Ingredient."""
@@ -140,7 +137,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
-        tags = validated_data.pop('tags')
+        tags = Tag.objects.get(id=validated_data)
         author = self.context.get('request').user
 
         recipe = Recipe.objects.create(**validated_data,
