@@ -126,7 +126,7 @@ class RecipeTag(models.Model):
                                verbose_name='Рецепт')
 
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE,
-                             verbose_name='Тег')
+                            verbose_name='Тег')
 
     class Meta:
         constraints = [
