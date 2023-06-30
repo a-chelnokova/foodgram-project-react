@@ -52,21 +52,32 @@ class CustomUserSerializer(serializers.ModelSerializer):
 class ShowSubscriptionSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения подписок пользователя."""
 
-    author_recipes = ShortRecipeSerializer(many=True, read_only=True)
     recipes_count = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
+    recipes = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'username', 'first_name', 'last_name',
-                  'author_recipes', 'recipes_count', 'is_subscribed')
+        fields = ('id', 'email', 'username', 'first_name', 'last_name',
+                  'is_subscribed', 'recipes', 'recipes_count')
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj).count()
 
     def get_is_subscribed(self, obj):
-        user = self.context['request'].user
-        return Subscription.objects.filter(author=obj, user=user).exists()
+        request = self.context.get('request')
+        if request.user.is_anonymous or request is None:
+            return False
+        return Subscription.objects.filter(author=obj,
+                                           user=request.user).exists()
+
+    def get_recipes(self, obj):
+        request = self.context.get('request')
+        if request.user.is_anonymous or request is None:
+            return False
+        recipes = Recipe.objects.filter(author=obj)
+        return ShortRecipeSerializer(recipes, many=True,
+                                     context={'request': request}).data
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
@@ -74,11 +85,14 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Subscription
-        fields = '__all__'
+        fields = ('user', 'author')
 
     def to_representation(self, instance):
         return ShowSubscriptionSerializer(instance.author, read_only=True,
-                                          many=True).data
+                                          many=True,
+                                          context={'request':
+                                                   self.context.get('request')
+                                                   }).data
 
 
 class TagSerializer(serializers.ModelSerializer):

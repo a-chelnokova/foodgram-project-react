@@ -5,6 +5,7 @@ from rest_framework.response import Response
 
 from api.serializers import ShowSubscriptionSerializer, SubscriptionSerializer
 from users.models import CustomUser, Subscription
+from api.pagination import CustomPagination
 
 
 class SubscriptionViewSet(views.APIView):
@@ -36,8 +37,12 @@ class SubscriptionListViewSet(generics.ListAPIView):
     """Вьюсет для отображения подписок пользователя."""
 
     permission_classes = [IsAuthenticated]
-    serializer_class = ShowSubscriptionSerializer
+    pagination_class = CustomPagination
 
-    def get_queryset(self):
-        user = self.request.user
-        return Subscription.objects.filter(user=user)
+    def get(self, request):
+        user = request.user
+        queryset = CustomUser.objects.filter(author__user=user)
+        page = self.paginate_queryset(queryset)
+        serializer = ShowSubscriptionSerializer(page, many=True,
+                                                context={'request': request})
+        return self.get_paginated_response(serializer.data)
