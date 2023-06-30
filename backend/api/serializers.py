@@ -142,8 +142,7 @@ class RecipeSerializer(PostDeleteMixin,
         if request is None or request.user.is_anonymous:
             return False
         return ShoppingCart.objects.filter(
-            user=request.user, recipe_id=obj
-        ).exists()
+            user=request.user, recipe=obj).exists()
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
