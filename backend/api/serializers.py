@@ -203,7 +203,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         )
 
         for tag in tags:
-            RecipeTag.objects.create(recipe=recipe, tags=tag)
+            RecipeTag.objects.create(recipe=recipe, tag=tag)
 
         return recipe
 
