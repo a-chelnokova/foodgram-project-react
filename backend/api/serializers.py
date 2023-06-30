@@ -111,10 +111,10 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe."""
 
-    ingredients = RecipeIngredientSerializer(many=True)
     tags = TagSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
 
+    ingredients = serializers.SerializerMethodField()
     is_favorited = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -124,6 +124,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ('pub_date', 'name', 'ingredients', 'tags', 'text',
                   'cooking_time', 'image', 'author',
                   'is_favorited', 'is_in_shopping_cart')
+
+    def get_ingredients(self, obj):
+        ingredients = RecipeIngredient.objects.filter(recipe=obj)
+        return RecipeIngredientSerializer(ingredients, many=True).data
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
@@ -142,6 +146,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для создания и редактирования рецептов."""
 
     ingredients = RecipeIngredientSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
@@ -196,6 +201,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                     amount=ingredient.get('amount')
                 )
         return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        return RecipeSerializer(instance, context={
+            'request': self.context.get('request')}).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
