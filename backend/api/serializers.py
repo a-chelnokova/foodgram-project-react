@@ -196,9 +196,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                                        author=author)
 
         for ingredient in ingredients:
-            RecipeIngredient.objects.create(recipe=recipe,
+            RecipeIngredient.objects.create(
+                recipe=recipe,
                 ingredient=Ingredient.objects.get(id=ingredient['id']),
-                amount=ingredient.get('amount'))
+                amount=ingredient.get('amount'),
+            )
 
         for tag in tags:
             RecipeTag.objects.create(recipe=recipe, tag=tag)
