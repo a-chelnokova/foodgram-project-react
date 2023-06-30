@@ -108,11 +108,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
         fields = ('id', 'amount')
 
 
-class RecipeTagSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели RecipeTag."""
-
-    
-
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe."""
 
@@ -158,7 +153,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('name', 'tags', 'ingredients', 'cooking_time',
-                  'text','image', 'author')
+                  'text', 'image', 'author')
 
     def validate_ingredients(self, ingredients):
         ing_ids = [ingredient['id'] for ingredient in ingredients]
