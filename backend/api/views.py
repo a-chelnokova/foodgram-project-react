@@ -10,7 +10,7 @@ from api.pagination import CustomPagination
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipeSerializer, ShoppingCartSerializer,
-                             TagSerializer)
+                             TagSerializer, CreateRecipeSerializer)
 from api.utils import PostDeleteMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
@@ -44,7 +44,16 @@ class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
-    serializer_class = RecipeSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == 'GET':
+            return RecipeSerializer
+        return CreateRecipeSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
 
     @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
             permission_classes=[AuthorOrReadOnly])
