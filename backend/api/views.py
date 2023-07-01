@@ -10,7 +10,7 @@ from rest_framework.validators import ValidationError
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
-#  from api.permissions import AuthorOrReadOnly
+from api.permissions import AuthorOrReadOnly
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
@@ -53,7 +53,7 @@ class RecipeViewSet(
 ):
     """Вьюсет для модели Recipe."""
 
-    permission_classes = [AllowAny, ]
+    permission_classes = [AuthorOrReadOnly, ]
     pagination_class = CustomPagination
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
