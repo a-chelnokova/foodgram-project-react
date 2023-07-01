@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from django.db import transaction
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from api.fields import Base64ImageField
