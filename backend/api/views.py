@@ -53,7 +53,7 @@ class RecipeViewSet(
 ):
     """Вьюсет для модели Recipe."""
 
-    permission_classes = [AuthorOrReadOnly, ]
+    permission_classes = [AllowAny, ]
     pagination_class = CustomPagination
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
