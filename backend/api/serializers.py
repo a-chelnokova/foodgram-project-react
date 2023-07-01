@@ -166,17 +166,14 @@ class ShowSubscriptionSerializer(serializers.ModelSerializer):
 
     def get_recipes(self, obj):
         request = self.context.get('request')
-        if request.GET.get('recipes_limit'):
-            recipes_limit = int(request.GET.get('recipes_limit'))
-            queryset = Recipe.objects.filter(
-                author=obj.author)[:recipes_limit]
-        else:
-            queryset = Recipe.objects.filter(
-                author=obj.author)
-        serializer = ShortRecipeSerializer(
-            queryset, read_only=True, many=True
-        )
-        return serializer.data
+        if not request or request.user.is_anonymous:
+            return False
+        recipes = Recipe.objects.filter(author=obj)
+        limit = request.query_params.get('recipes_limit')
+        if limit:
+            recipes = recipes[:int(limit)]
+        return ShortRecipeSerializer(
+            recipes, many=True, context={'request': request}).data
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
