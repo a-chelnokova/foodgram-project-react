@@ -23,7 +23,7 @@ class CustomUserCreateSerializer(UserCreateMixin,
 
     class Meta:
         model = CustomUser
-        fields = fields = [
+        fields = [
             'email',
             'username',
             'first_name',
@@ -170,7 +170,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     author = CustomUserSerializer(read_only=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(), many=True
-    )
+        )
     image = Base64ImageField()
 
     class Meta:

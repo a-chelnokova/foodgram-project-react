@@ -1,35 +1,40 @@
-from django_filters import rest_framework as filter
-from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import FilterSet, filters
+from recipes.models import Ingredient, Recipe
 
-from recipes.models import Recipe, Tag
-
-
-class IngredientFilter(SearchFilter):
-    search_param = 'name'
+from recipes.models import Tag
+from users.models import CustomUser
 
 
-class RecipeFilter(filter.FilterSet):
-    author = filter.CharFilter()
-    tags = filter.ModelMultipleChoiceFilter(
-        field_name='s__slug',
+class IngredientFilter(FilterSet):
+    name = filters.CharFilter(lookup_expr='istartswith')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
+
+
+class RecipeFilter(FilterSet):
+    author = filters.ModelChoiceFilter(queryset=CustomUser.objects.all())
+    tags = filters.ModelMultipleChoiceFilter(
+        field_name='tags__slug',
         queryset=Tag.objects.all(),
-        label='Tags',
-        to_field_name='slug'
+        to_field_name='slug',
     )
-    is_favorited = filter.NumberFilter(method='get_favorite')
-    in_shopping_cart = filter.NumberFilter(
-        method='get_in_shopping_cart')
+    in_favorites = filters.BooleanFilter(method='get_in_favorites')
+    in_shopping_cart = filters.BooleanFilter(
+        method='get_in_shopping_cart'
+    )
 
     class Meta:
         model = Recipe
         fields = ['tags', 'author', 'in_favorites', 'in_shopping_cart']
 
-    def get_favorite(self, queryset, name, value):
+    def get_in_favorites(self, queryset, name, value):
         if value:
-            return queryset.filter(favorites__user=self.request.user)
+            return queryset.filter(in_favorites__user=self.request.user)
         return queryset
 
     def get_in_shopping_cart(self, queryset, name, value):
         if value:
-            return queryset.filter(in_shopping_cart=True)
+            return queryset.filter(shopping_cart__user=self.request.user)
         return queryset
