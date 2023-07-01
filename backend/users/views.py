@@ -2,9 +2,13 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, views
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.authtoken.views import ObtainAuthToken
+from rest_framework.permissions import (AllowAny, IsAuthenticated)
+from rest_framework.authtoken.models import Token
 
 from api.serializers import ShowSubscriptionSerializer, SubscriptionSerializer
 from users.models import CustomUser, Subscription
+from users.serializers import TokenSerializer
 from api.pagination import CustomPagination
 
 
@@ -51,3 +55,19 @@ class SubscriptionListViewSet(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return user.subscriber.all()
+
+
+class AuthToken(ObtainAuthToken):
+    """Авторизация пользователя."""
+
+    serializer_class = TokenSerializer
+    permission_classes = (AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        token, created = Token.objects.get_or_create(user=user)
+        return Response(
+            {'auth_token': token.key},
+            status=status.HTTP_201_CREATED)
