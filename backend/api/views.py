@@ -1,9 +1,12 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.validators import ValidationError
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
@@ -96,3 +99,19 @@ class RecipeViewSet(
         response['Content-Disposition'] = ('attachment; '
                                            'filename="shopping_cart.txt"')
         return response
+
+    def add_recipe(self, model, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        user = self.request.user
+        if model.objects.filter(recipe=recipe, user=user).exists():
+            raise ValidationError('Рецепт уже добавлен')
+        model.objects.create(recipe=recipe, user=user)
+        serializer = ShortRecipeSerializer(recipe)
+        return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete_recipe(self, model, request, pk):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        user = self.request.user
+        obj = get_object_or_404(model, recipe=recipe, user=user)
+        obj.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
