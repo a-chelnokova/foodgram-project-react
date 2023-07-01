@@ -1,9 +1,10 @@
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.db import IntegrityError, transaction
+from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from api.fields import Base64ImageField
-from api.utils import UserCreateMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import CustomUser, Subscription
@@ -22,25 +23,32 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         ]
 
 
-class CustomUserCreateSerializer(UserCreateMixin,
-                                 serializers.ModelSerializer):
+class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор для регистрации новых пользователей."""
+
+    def create(self, validated_data):
+        try:
+            user = self.perform_create(validated_data)
+        except IntegrityError:
+            self.fail('cannot_create')
+        return user
+
+    def perform_create(self, validated_data):
+        with transaction.atomic():
+            user = CustomUser.objects.create_user(**validated_data)
+        return user
 
     class Meta:
         model = CustomUser
-        fields = [
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'password',
-        ]
+        fields = tuple(CustomUser.REQUIRED_FIELDS) + (
+            CustomUser.USERNAME_FIELD,
+        )
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(UserSerializer):
     """Сериализатор для модели CustomUser."""
 
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = CustomUser
