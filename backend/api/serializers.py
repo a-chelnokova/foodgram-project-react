@@ -206,7 +206,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     )
 
     in_favorites = serializers.SerializerMethodField()
-    in_shopping_cart = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
@@ -219,7 +219,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'image',
             'text',
             'in_favorites',
-            'in_shopping_cart',
+            'is_in_shopping_cart',
             'cooking_time',
         ]
 
@@ -235,7 +235,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_in_favorites(self, obj):
         return self.in_list_exists(obj, Favorite)
 
-    def get_in_shopping_cart(self, obj):
+    def get_is_in_shopping_cart(self, obj):
         return self.in_list_exists(obj, ShoppingCart)
 
 
