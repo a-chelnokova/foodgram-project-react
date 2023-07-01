@@ -7,7 +7,6 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
-from api.permissions import AuthorOrReadOnly
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
@@ -50,7 +49,6 @@ class RecipeViewSet(
 ):
     """Вьюсет для модели Recipe."""
 
-    permission_classes = [AuthorOrReadOnly, ]
     pagination_class = CustomPagination
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
@@ -74,7 +72,7 @@ class RecipeViewSet(
 
     @action(detail=True,
             methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated])
+            permission_classes=[IsAuthenticated, ])
     def shopping_cart(self, request, pk):
         return self.post_delete(ShoppingCart, ShortRecipeSerializer,
                                 request, pk)
