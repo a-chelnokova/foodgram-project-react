@@ -8,7 +8,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import AuthorOrReadOnly
-from api.serializers import (FavoriteSerializer, IngredientSerializer,
+from api.serializers import (IngredientSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
 from api.utils import PostDeleteMixin
@@ -65,17 +65,15 @@ class RecipeViewSet(
         user = self.request.user
         serializer.save(author=user)
 
-    @action(
-            detail=True,
+    @action(detail=True,
             methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated,]
+            permission_classes=[IsAuthenticated, ]
     )
     def favorite(self, request, pk=None):
         return self.post_delete(Favorite, ShortRecipeSerializer,
                                 request, pk)
 
-    @action(
-            detail=True,
+    @action(detail=True,
             methods=['POST', 'DELETE'],
             permission_classes=[IsAuthenticated]
     )
@@ -83,10 +81,7 @@ class RecipeViewSet(
         return self.post_delete(ShoppingCart, ShortRecipeSerializer,
                                 request, pk)
 
-    @action(
-            detail=False,
-            methods=['GET']
-    )
+    @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
         shopping_ingredients = RecipeIngredient.objects.filter(
             recipe__shopping_cart__user=request.user

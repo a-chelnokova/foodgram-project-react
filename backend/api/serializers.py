@@ -3,9 +3,9 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 
 from api.fields import Base64ImageField
-from api.utils import UserCreateMixin, PostDeleteMixin
+from api.utils import UserCreateMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag, RecipeTag)
+                            ShoppingCart, Tag)
 from users.models import CustomUser, Subscription
 
 
@@ -20,7 +20,6 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         ]
-
 
 
 class CustomUserCreateSerializer(UserCreateMixin,
@@ -213,7 +212,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = [
             'id',
-            'tags', 
+            'tags',
             'name',
             'author',
             'ingredients',
@@ -257,7 +256,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'tags',
             'ingredients',
             'cooking_time',
-            'text', 
+            'text',
             'image',
         ]
 

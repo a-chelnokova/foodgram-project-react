@@ -18,7 +18,10 @@ class PostDeleteMixin:
                 raise ValidationError('Рецепт уже добавлен')
             model.objects.create(recipe=recipe, user=user)
             serializer = model_serializer(recipe)
-            return Response(data=serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                data=serializer.data,
+                status=status.HTTP_201_CREATED
+            )
         obj = get_object_or_404(model, recipe=recipe, user=user)
         obj.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
