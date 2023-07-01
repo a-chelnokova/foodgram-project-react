@@ -84,8 +84,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True,
             methods=['POST', 'DELETE'],
             permission_classes=(IsAuthenticated, ),
-            pagination_class=None,
-    )
+            pagination_class=None,)
     def favorite(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         serializer = FavoriteSerializer(
@@ -109,8 +108,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     @action(detail=True,
             methods=['POST', 'DELETE'],
             permission_classes=(IsAuthenticated,),
-            pagination_class=None,
-    )
+            pagination_class=None,)
     def shopping_cart(self, request, pk):
         recipe = get_object_or_404(Recipe, id=pk)
         serializer = ShoppingCartSerializer(
