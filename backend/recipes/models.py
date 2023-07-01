@@ -82,7 +82,7 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент',
     )
 
-    amount = models.CharField(max_length=20) # не менялось
+    amount = models.CharField(max_length=20)  # не менялось
 
     class Meta:
         verbose_name = 'Количество ингредиента'
