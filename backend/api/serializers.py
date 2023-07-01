@@ -27,15 +27,14 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
     def create(self, validated_data):
-        try:
-            user = self.perform_create(validated_data)
-        except IntegrityError:
-            self.fail('cannot_create')
-        return user
-
-    def perform_create(self, validated_data):
-        with transaction.atomic():
-            user = CustomUser.objects.create_user(**validated_data)
+        user = CustomUser(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+        )
+        user.set_password(validated_data['password'])
+        user.save()
         return user
 
     class Meta:
