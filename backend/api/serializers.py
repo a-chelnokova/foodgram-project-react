@@ -209,12 +209,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     author = CustomUserSerializer()
     image = Base64ImageField()
-    ingredients = RecipeIngredientSerializer(
-        source='ingredient_in_recipe',
-        read_only=True,
-        many=True,
-    )
 
+    ingredients = serializers.SerializerMethodField()
     in_favorites = serializers.SerializerMethodField()
     is_in_shopping_cart = serializers.SerializerMethodField()
 
@@ -247,6 +243,10 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         return self.in_list_exists(obj, ShoppingCart)
+
+    def get_ingredients(self, obj):
+        ingredients = RecipeIngredient.objects.filter(recipe=obj)
+        return RecipeIngredientSerializer(ingredients, many=True).data
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
