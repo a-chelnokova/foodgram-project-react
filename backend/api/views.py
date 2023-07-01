@@ -1,7 +1,7 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets
+from rest_framework import viewsets, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
@@ -9,14 +9,18 @@ from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
-                             RecipeSerializer, ShoppingCartSerializer,
+                             RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
-from api.utils import PostDeleteMixin, process_recipe_saving
+from api.utils import PostDeleteMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 
 
-class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+class IngredientViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     """Вьюсет для модели Ingredient."""
 
     permission_classes = [AllowAny, ]
@@ -27,7 +31,11 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     search_fields = ['^name', ]
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
+class TagViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
     """Вьюсет для модели Tag."""
 
     permission_classes = [AllowAny, ]
@@ -36,7 +44,10 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
 
 
-class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
+class RecipeViewSet(
+    PostDeleteMixin,
+    viewsets.ModelViewSet
+):
     """Вьюсет для модели Recipe."""
 
     permission_classes = [AuthorOrReadOnly, ]
@@ -46,28 +57,36 @@ class RecipeViewSet(PostDeleteMixin, viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.action in ('list', 'retrieve'):
             return RecipeSerializer
         return CreateRecipeSerializer
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update({'request': self.request})
-        return context
+    def perform_create(self, serializer):
+        user = self.request.user
+        serializer.save(author=user)
 
-    @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
-            permission_classes=[IsAuthenticated])
-    def favorite(self, request, pk):
-        return process_recipe_saving(request, pk,
-                                     FavoriteSerializer, Favorite)
+    @action(
+            detail=True,
+            methods=['POST', 'DELETE'],
+            permission_classes=[IsAuthenticated,]
+    )
+    def favorite(self, request, pk=None):
+        return self.post_delete(Favorite, ShortRecipeSerializer,
+                                request, pk)
 
-    @action(detail=True, methods=['POST', 'DELETE'], url_path='shopping_cart',
-            permission_classes=[IsAuthenticated])
+    @action(
+            detail=True,
+            methods=['POST', 'DELETE'],
+            permission_classes=[IsAuthenticated]
+    )
     def shopping_cart(self, request, pk):
-        return process_recipe_saving(request, pk,
-                                     ShoppingCartSerializer, ShoppingCart)
+        return self.post_delete(ShoppingCart, ShortRecipeSerializer,
+                                request, pk)
 
-    @action(detail=False, methods=['GET'])
+    @action(
+            detail=False,
+            methods=['GET']
+    )
     def download_shopping_cart(self, request):
         shopping_ingredients = RecipeIngredient.objects.filter(
             recipe__shopping_cart__user=request.user
