@@ -1,8 +1,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status, views
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
 from api.serializers import ShowSubscriptionSerializer, SubscriptionSerializer
 from users.models import CustomUser, Subscription
@@ -45,7 +44,7 @@ class SubscriptionViewSet(views.APIView):
 class SubscriptionListViewSet(generics.ListAPIView):
     """Вьюсет для отображения подписок пользователя."""
 
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [AllowAny, ]
     pagination_class = CustomPagination
     serializer_class = ShowSubscriptionSerializer
 
