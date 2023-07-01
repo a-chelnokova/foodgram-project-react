@@ -3,14 +3,14 @@ from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, mixins, status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+#  from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
-from api.permissions import AuthorOrReadOnly
+#  from api.permissions import AuthorOrReadOnly
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
@@ -26,7 +26,6 @@ class IngredientViewSet(
 ):
     """Вьюсет для модели Ingredient."""
 
-    permission_classes = [AllowAny, ]
     pagination_class = None
     serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
@@ -41,7 +40,6 @@ class TagViewSet(
 ):
     """Вьюсет для модели Tag."""
 
-    permission_classes = [AllowAny, ]
     pagination_class = None
     serializer_class = TagSerializer
     queryset = Tag.objects.all()
@@ -53,7 +51,6 @@ class RecipeViewSet(
 ):
     """Вьюсет для модели Recipe."""
 
-    permission_classes = [AuthorOrReadOnly, ]
     pagination_class = CustomPagination
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
@@ -69,15 +66,13 @@ class RecipeViewSet(
         serializer.save(author=user)
 
     @action(detail=True,
-            methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated, ])
+            methods=['POST', 'DELETE'])
     def favorite(self, request, pk=None):
         return self.post_delete(Favorite, ShortRecipeSerializer,
                                 request, pk)
 
     @action(detail=True,
-            methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated])
+            methods=['POST', 'DELETE'])
     def shopping_cart(self, request, pk):
         return self.post_delete(ShoppingCart, ShortRecipeSerializer,
                                 request, pk)
