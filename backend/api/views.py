@@ -1,49 +1,35 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 #  from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, mixins, status
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
 
-from api.filters import IngredientFilter, RecipeFilter
+from api.filters import RecipeFilter
 #  from api.pagination import CustomPagination
 from api.permissions import AuthorOrReadOnly
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer, CreateRecipeSerializer,
                              FavoriteSerializer, ShoppingCartSerializer)
-#  from api.utils import PostDeleteMixin
+from api.utils import TagIngredientMixinViewSet
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 
 
-class IngredientViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet
-):
-    """Вьюсет для модели Ingredient."""
-
-    pagination_class = None
-    serializer_class = IngredientSerializer
+class IngredientViewSet(TagIngredientMixinViewSet):
+    """Модель обработки запроса к ингредиентам."""
     queryset = Ingredient.objects.all()
-    filterset_class = IngredientFilter
-    search_fields = ['^name', ]
+    serializer_class = IngredientSerializer
 
 
-class TagViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
-    """Вьюсет для модели Tag."""
-
-    pagination_class = None
-    serializer_class = TagSerializer
+class TagsViewSet(TagIngredientMixinViewSet):
+    """Модель обработки запроса к тегам."""
     queryset = Tag.objects.all()
+    serializer_class = TagSerializer
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
