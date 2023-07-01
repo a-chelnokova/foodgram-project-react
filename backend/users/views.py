@@ -11,24 +11,32 @@ from api.pagination import CustomPagination
 class SubscriptionViewSet(views.APIView):
     """Вьюсет для модели Subscription."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ]
+    pagination_class = CustomPagination
 
-    def post(self, request, *args, **kwargs):
-        pk = kwargs.get('id', None)
+    def post(self, request, pk):
         author = get_object_or_404(CustomUser, pk=pk)
-
-        sub = Subscription(author=author, user=request.user)
-        sub.save()
-
-        serializer = SubscriptionSerializer(author,
-                                            context={'request': request})
+        user = self.request.user
+        data = {
+            'author': author.id,
+            'user': user.id,
+        }
+        serializer = SubscriptionSerializer(
+            data=data,
+            context={'request': request},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, id):
-        author = get_object_or_404(CustomUser, id=id)
-        subscription = get_object_or_404(Subscription, user=request.user,
-                                         author=author)
+    def delete(self, request, pk):
+        author = get_object_or_404(CustomUser, pk=pk)
+        subscription = get_object_or_404(
+            Subscription,
+            user=self.request.user,
+            author=author
+        )
         subscription.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -36,13 +44,10 @@ class SubscriptionViewSet(views.APIView):
 class SubscriptionListViewSet(generics.ListAPIView):
     """Вьюсет для отображения подписок пользователя."""
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, ]
     pagination_class = CustomPagination
+    serializer_class = ShowSubscriptionSerializer
 
-    def get(self, request):
-        user = request.user
-        queryset = CustomUser.objects.filter(author__user=user)
-        page = self.paginate_queryset(queryset)
-        serializer = ShowSubscriptionSerializer(page, many=True,
-                                                context={'request': request})
-        return self.get_paginated_response(serializer.data)
+    def get_queryset(self):
+        user = self.request.user
+        return user.subscriber.all()
