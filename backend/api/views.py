@@ -67,16 +67,14 @@ class RecipeViewSet(
 
     @action(detail=True,
             methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated, ]
-    )
+            permission_classes=[IsAuthenticated, ])
     def favorite(self, request, pk=None):
         return self.post_delete(Favorite, ShortRecipeSerializer,
                                 request, pk)
 
     @action(detail=True,
             methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated]
-    )
+            permission_classes=[IsAuthenticated])
     def shopping_cart(self, request, pk):
         return self.post_delete(ShoppingCart, ShortRecipeSerializer,
                                 request, pk)
