@@ -3,14 +3,9 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.validators import ValidationError
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin)
-from rest_framework.viewsets import GenericViewSet
-from rest_framework.filters import SearchFilter
 
 from recipes.models import Recipe
 from users.models import CustomUser
-from api.permissions import AuthorOrReadOnly
 
 
 class PostDeleteMixin:
@@ -44,16 +39,3 @@ class UserCreateMixin:
         with transaction.atomic():
             user = CustomUser.objects.create_user(**validated_data)
         return user
-
-
-class TagIngredientMixinViewSet(
-        ListModelMixin,
-        CreateModelMixin,
-        DestroyModelMixin,
-        RetrieveModelMixin,
-        GenericViewSet):
-    """Миксин для классов тега и ингредиента."""
-    pagination_class = None
-    filter_backends = [SearchFilter, ]
-    search_fields = ['name']
-    permission_classes = (AuthorOrReadOnly,)
