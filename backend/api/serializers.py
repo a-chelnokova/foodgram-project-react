@@ -1,10 +1,9 @@
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
 from django.db import transaction
-from django.db import transaction
-from djoser.serializers import UserCreateSerializer, UserSerializer
 
 from api.fields import Base64ImageField
+from api.utils import UserCreateMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.models import CustomUser, Subscription
@@ -23,31 +22,25 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
         ]
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class CustomUserCreateSerializer(UserCreateMixin,
+                                 serializers.ModelSerializer):
     """Сериализатор для регистрации новых пользователей."""
-
-    def create(self, validated_data):
-        user = CustomUser(
-            email=validated_data['email'],
-            username=validated_data['username'],
-            first_name=validated_data['first_name'],
-            last_name=validated_data['last_name'],
-        )
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
 
     class Meta:
         model = CustomUser
-        fields = tuple(CustomUser.REQUIRED_FIELDS) + (
-            CustomUser.USERNAME_FIELD,
-        )
+        fields = [
+            'email',
+            'username',
+            'first_name',
+            'last_name',
+            'password',
+        ]
 
 
-class CustomUserSerializer(UserSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели CustomUser."""
 
-    is_subscribed = serializers.SerializerMethodField(read_only=True)
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
