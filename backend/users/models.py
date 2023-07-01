@@ -28,16 +28,12 @@ class CustomUser(AbstractUser):
     )
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = [
-        'username',
-        'first_name',
-        'last_name',
-        'password'
-    ]
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ['username']
 
     def __str__(self):
         return self.username
@@ -62,6 +58,7 @@ class Subscription(models.Model):
     class Meta():
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'], name='unique_subscription'
