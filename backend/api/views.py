@@ -43,7 +43,6 @@ class RecipeViewSet(
     """Вьюсет для модели Recipe."""
 
     queryset = Recipe.objects.all()
-    permission_classes = (AuthorOrAdminOrReadOnly, )
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, ]
     filter_class = RecipeFilter
@@ -64,7 +63,8 @@ class RecipeViewSet(
             status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
-            methods=['POST', 'DELETE'])
+            methods=['POST', 'DELETE'],
+            permission_classes=[IsAuthenticated, ])
     def favorite(self, request, pk=None):
         return self.post_delete(Favorite, ShortRecipeSerializer,
                                 request, pk)
