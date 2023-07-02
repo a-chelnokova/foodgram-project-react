@@ -46,7 +46,7 @@ class RecipeViewSet(
     queryset = Recipe.objects.all()
     permission_classes = (AuthorOrAdminOrReadOnly,)
     pagination_class = CustomPagination
-    filter_backends = [DjangoFilterBackend, filters.OrderingFilter,]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH', 'DELETE'):
