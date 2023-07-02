@@ -99,7 +99,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
-
     def get_is_favorited(self, obj):
         user = self.context['request'].user
         if user.is_anonymous:
