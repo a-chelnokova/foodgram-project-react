@@ -20,11 +20,9 @@ class RecipeFilter(FilterSet):
         queryset=Tag.objects.all(),
         to_field_name='slug',
     )
-    in_favorites = filters.NumberFilter(method='get_in_favorites',
-                                        field_name='in_favorites')
-    is_in_shopping_cart = filters.NumberFilter(
-        method='get_is_in_shopping_cart',
-        field_name='is_in_shopping_cart'
+    in_favorites = filters.BooleanFilter(method='get_in_favorites')
+    is_in_shopping_cart = filters.BooleanFilter(
+        method='get_is_in_shopping_cart'
     )
 
     class Meta:

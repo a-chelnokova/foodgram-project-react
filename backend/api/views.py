@@ -7,26 +7,28 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
+from api.permissions import AuthorOrReadOnly
 from api.serializers import (IngredientSerializer,
-                             RecipeSerializer,
-                             TagSerializer, CreateRecipeSerializer,
-                             ShortRecipeSerializer)
+                             RecipeSerializer, ShortRecipeSerializer,
+                             TagSerializer, CreateRecipeSerializer)
 from api.utils import PostDeleteMixin
-from api.permissions import AuthorOrAdminOrReadOnly
-from recipes.models import (Ingredient, Recipe, RecipeIngredient,
-                            Tag, Favorite, ShoppingCart)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 
 
-class IngredientViewSet(viewsets.ModelViewSet):
+class IngredientViewSet(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    viewsets.GenericViewSet
+):
     """Вьюсет для модели Ingredient."""
 
-    queryset = Ingredient.objects.all()
     permission_classes = [AllowAny, ]
-    serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend, )
-    filter_class = IngredientFilter
-    search_fields = ['^name', ]
     pagination_class = None
+    serializer_class = IngredientSerializer
+    queryset = Ingredient.objects.all()
+    filterset_class = IngredientFilter
+    search_fields = ['^name', ]
 
 
 class TagViewSet(
@@ -48,7 +50,7 @@ class RecipeViewSet(
 ):
     """Вьюсет для модели Recipe."""
 
-    permission_classes = [AuthorOrAdminOrReadOnly, ]
+    permission_classes = [AuthorOrReadOnly, ]
     pagination_class = CustomPagination
     queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
