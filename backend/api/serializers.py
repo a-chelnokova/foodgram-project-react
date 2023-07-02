@@ -139,6 +139,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all(), many=True
     )
     image = Base64ImageField()
+
     class Meta:
         model = Recipe
         fields = ('name', 'tags', 'ingredients', 'cooking_time',
@@ -151,6 +152,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
                 'Нельзя дублировать ингредиенты.'
             )
         return ingredients
+
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
@@ -165,6 +167,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         for tag in tags:
             RecipeTag.objects.create(recipe=recipe, tag=tag)
         return recipe
+
     def update(self, instance, validated_data):
         instance.tags = validated_data.get('tags', instance.tags)
         ingredients = validated_data.pop('ingredients')
