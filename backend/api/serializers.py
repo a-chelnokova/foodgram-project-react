@@ -3,10 +3,9 @@ from django.shortcuts import get_object_or_404
 from django.db import transaction
 
 from api.fields import Base64ImageField
-from api.utils import UserCreateMixin
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
-from users.models import CustomUser, Subscription
+from users.serializers import CustomUserSerializer
 
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
@@ -20,47 +19,6 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
             'image',
             'cooking_time',
         ]
-
-
-class CustomUserCreateSerializer(UserCreateMixin,
-                                 serializers.ModelSerializer):
-    """Сериализатор для регистрации новых пользователей."""
-
-    class Meta:
-        model = CustomUser
-        fields = [
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'password',
-        ]
-
-
-class CustomUserSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели CustomUser."""
-
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta:
-        model = CustomUser
-        fields = [
-            'id',
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'is_subscribed',
-        ]
-
-    def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        if request.user.is_anonymous or request is None:
-            return False
-        return Subscription.objects.filter(
-            user=request.user,
-            author=obj,
-        ).exists()
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -130,74 +88,6 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShoppingCart
         fields = ('user', 'recipe')
-
-
-class ShowSubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор для отображения подписок пользователя."""
-
-    recipes_count = serializers.SerializerMethodField()
-    is_subscribed = serializers.SerializerMethodField()
-    recipes = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Subscription
-        fields = [
-            'id',
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'recipes',
-            'recipes_count',
-            'is_subscribed',
-        ]
-
-    def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj.author).count()
-
-    def get_is_subscribed(self, obj):
-        request = self.context.get('request')
-        if request.user.is_anonymous or request is None:
-            return False
-        return Subscription.objects.filter(
-            author=obj.author,
-            user=request.user
-        ).exists()
-
-    def get_recipes(self, obj):
-        request = self.context.get('request')
-        limit = request.GET.get('recipes_limit')
-        queryset = Recipe.objects.filter(author=obj.author)
-        if limit:
-            queryset = queryset[:int(limit)]
-        return ShortRecipeSerializer(queryset, many=True).data
-
-
-class SubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Subscription."""
-
-    class Meta:
-        model = Subscription
-        fields = [
-            'user',
-            'author',
-        ]
-
-    def to_representation(self, instance):
-        return ShowSubscriptionSerializer(instance,
-                                          context={'request':
-                                                   self.context.get('request')
-                                                   }).data
-
-    def validate(self, data):
-        author = data.get('author')
-        user = data.get('user')
-
-        if author == user:
-            raise serializers.ValidationError(
-                'Нельзя подписываться на самого себя'
-            )
-        return data
 
 
 class RecipeSerializer(serializers.ModelSerializer):

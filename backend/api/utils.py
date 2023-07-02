@@ -39,3 +39,42 @@ class UserCreateMixin:
         with transaction.atomic():
             user = CustomUser.objects.create_user(**validated_data)
         return user
+
+
+def subscrib_post(request, id, model, model_user, serializer):
+    """Создает новую подписку"""
+
+    user = request.user
+    author = get_object_or_404(model_user, id=id)
+
+    if model.objects.filter(user=user, following=author).exists():
+        return Response(
+            {'errors': 'Нельзя подписаться дважды'},
+            status=status.HTTP_400_BAD_REQUEST)
+    if user == author:
+        return Response(
+            {'errors': 'Нельзя подписаться на самого себя'},
+            status=status.HTTP_400_BAD_REQUEST)
+
+    follow = model.objects.create(user=user, following=author)
+    serializer = serializer(follow, context={'request': request})
+    return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+def subscrib_delete(request, pk, model, model_user):
+    """Удаляет существующую подписку"""
+
+    user = request.user
+    author = get_object_or_404(model_user, id=pk)
+
+    if not model.objects.filter(user=user, following=author).exists():
+        return Response(
+            {'errors': 'Вы не подписаны на данного пользователя'},
+            status=status.HTTP_400_BAD_REQUEST)
+
+    follow = get_object_or_404(model, user=user, following=author)
+    follow.delete()
+    return Response(
+        {'message': 'Подписка удалена'},
+        status=status.HTTP_204_NO_CONTENT
+    )
