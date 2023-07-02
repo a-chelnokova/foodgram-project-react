@@ -17,8 +17,7 @@ from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag, Favorite)
 from users.serializers import RecipeFollowSerializer
-from api.utils import subscrib_delete, subscrib_post
-from users.models import CustomUser
+from api.utils import shopping_post, shopping_delete
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -77,9 +76,9 @@ class RecipeViewSet(
     )
     def favorite(self, request, id=None):
         if request.method == 'POST':
-            return subscrib_post(request, id, Favorite, CustomUser,
+            return shopping_post(request, id, Favorite,
                                  FavoriteSerializer)
-        return subscrib_delete(request, id, Favorite, CustomUser)
+        return shopping_delete(request, id, Favorite)
 
     @action(detail=True,
             methods=['POST', 'DELETE'])
