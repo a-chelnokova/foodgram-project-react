@@ -8,7 +8,9 @@ from rest_framework.response import Response
 from api.pagination import CustomPagination
 from api.utils import subscrib_delete, subscrib_post
 from users.models import Subscription, CustomUser
-from users.serializers import CustomUserSerializer, SubscriptionSerializer
+from users.serializers import (CustomUserSerializer,
+                               CustomUserCreateSerializer,
+                               SubscriptionSerializer)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -17,24 +19,10 @@ class CustomUserViewSet(UserViewSet):
     queryset = CustomUser.objects.all().order_by('-date_joined')
     pagination_class = CustomPagination
 
-    @action(
-        methods=['get', 'patch'],
-        detail=False,
-        permission_classes=(IsAuthenticated,),)
-    def me(self, request):
-        """Выводит информацию о пользователе"""
-
-        serializer = CustomUserSerializer(
-            request.user, context={'request': request})
-        if request.method == 'PATCH':
-            serializer = CustomUserSerializer(
-                request.user,
-                data=request.data,
-                context={'request': request},
-                partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def get_serializer_class(self):
+        if self.request.method in ('POST', 'PATCH', 'DELETE'):
+            return CustomUserCreateSerializer
+        return CustomUserSerializer
 
     @action(
         detail=True,
@@ -74,8 +62,3 @@ class CustomUserViewSet(UserViewSet):
             'previous': self.paginator.get_previous_link(),
             'results': serializer.data}
         return Response(response_data)
-
-    def perform_create(self, serializer):
-        instance = serializer.save()
-        instance.set_password(instance.password)
-        instance.save()
