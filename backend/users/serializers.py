@@ -90,7 +90,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
     recipes_count = serializers.ReadOnlyField(source='author.recipes.count')
-    
+
     is_subscribed = serializers.SerializerMethodField(
         method_name='get_is_subscribed'
     )
