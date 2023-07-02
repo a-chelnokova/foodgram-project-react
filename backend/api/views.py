@@ -12,7 +12,7 @@ from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer, FavoriteSerializer,
                              TagSerializer, CreateRecipeSerializer)
-from api.utils import PostDeleteMixin
+from api.utils import PostDeleteMixin, shopcart_or_favorite
 from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag, Favorite)
@@ -71,14 +71,19 @@ class RecipeViewSet(
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated, ],
+        methods=['POST', 'DELETE'],
+        url_name='favorite',
+        url_path='favorite',
+        permission_classes=(IsAuthenticated,),
     )
-    def favorite(self, request, id=None):
-        if request.method == 'POST':
-            return shopping_post(request, id, Favorite,
-                                 FavoriteSerializer)
-        return shopping_delete(request, id, Favorite)
+    def favorite(self, request, pk):
+        return shopcart_or_favorite(
+            self,
+            request,
+            Favorite,
+            FavoriteSerializer,
+            pk,
+        )
 
     @action(detail=True,
             methods=['POST', 'DELETE'])

@@ -238,6 +238,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализтор для списка избранного."""
+    id = serializers.IntegerField(source='recipe.id')
+    name = serializers.CharField(source='recipe.name')
+    image = Base64ImageField(source='recipe.image')
+    cooking_time = serializers.IntegerField(source='recipe.cooking_time')
+
     class Meta:
         model = Favorite
-        fields = ('id', 'user', 'recipe',)
+        fields = ('id', 'name', 'image', 'cooking_time')
