@@ -13,10 +13,9 @@ class IngredientFilter(FilterSet):
 
 class RecipeFilter(FilterSet):
     author = filters.ModelChoiceFilter(queryset=CustomUser.objects.all())
-    tags = filters.ModelMultipleChoiceFilter(
+    tags = filters.AllValuesMultipleFilter(
         field_name='tags__slug',
-        queryset=Tag.objects.all(),
-        to_field_name='slug',
+        label='Теги'
     )
 
     is_favorited = filters.NumberFilter(
