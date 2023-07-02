@@ -1,4 +1,4 @@
-from djoser.views import UserViewSet
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -7,21 +7,15 @@ from rest_framework.response import Response
 from api.pagination import CustomPagination
 from api.utils import subscrib_delete, subscrib_post
 from users.models import Subscription, CustomUser
-from users.serializers import (CustomUserSerializer,
-                               CustomUserCreateSerializer,
-                               SubscriptionSerializer)
+from users.serializers import SubscriptionSerializer
 
 
-class CustomUserViewSet(UserViewSet):
+class SubscribeView(APIView):
     """ViewSet для работы с пользователями сервиса FoodGram."""
+
     permission_classes = (IsAuthenticatedOrReadOnly,)
     queryset = CustomUser.objects.all().order_by('-date_joined')
     pagination_class = CustomPagination
-
-    def get_serializer_class(self):
-        if self.request.method in ('POST', 'PATCH', 'DELETE'):
-            return CustomUserCreateSerializer
-        return CustomUserSerializer
 
     @action(
         detail=True,
