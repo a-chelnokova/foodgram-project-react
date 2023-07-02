@@ -27,6 +27,11 @@ class CustomUser(AbstractUser):
         verbose_name='Фамилия'
     )
 
+    password = models.CharField(
+        max_length=150,
+        verbose_name='Пароль'
+    )
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 

@@ -11,13 +11,7 @@ class CustomUserCreateSerializer(UserCreateMixin,
 
     class Meta():
         model = CustomUser
-        fields = [
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'password',
-        ]
+        fields = '__all__'
 
 
 class CustomUserSerializer(serializers.ModelSerializer):
