@@ -111,17 +111,18 @@ class Recipe(models.Model):
     pub_date = models.DateTimeField(
         verbose_name='Дата создания',
         auto_now_add=True,
-        db_index=True,
     )
 
     name = models.CharField(
         max_length=150,
+        unique=True,
         verbose_name='Название рецепта',
     )
 
     ingredients = models.ManyToManyField(
         Ingredient,
         through=RecipeIngredient,
+        related_name='recipes',
         verbose_name='Ингредиенты',
     )
 
@@ -153,7 +154,6 @@ class Recipe(models.Model):
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        null=True,
         verbose_name='Автор',
         related_name='recipes',
     )
