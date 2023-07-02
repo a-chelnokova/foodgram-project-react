@@ -1,7 +1,7 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, mixins
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -29,12 +29,17 @@ class IngredientViewSet(viewsets.ModelViewSet):
     search_fields = ['^name', ]
 
 
-class TagViewSet(viewsets.ModelViewSet):
+class TagViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
     """Вьюсет для модели Tag."""
 
-    queryset = Tag.objects.all()
     permission_classes = [AllowAny, ]
+    pagination_class = None
     serializer_class = TagSerializer
+    queryset = Tag.objects.all()
 
 
 class RecipeViewSet(
