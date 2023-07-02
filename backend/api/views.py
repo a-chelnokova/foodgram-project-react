@@ -5,34 +5,37 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer,
-                             RecipeSerializer, ShortRecipeSerializer,
+                             RecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
-from api.utils import PostDeleteMixin
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+from api.utils import PostDeleteMixin, shopping_delete, shopping_post
+from api.permissions import AuthorOrAdminOrReadOnly
+from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
+from users.serializers import RecipeFollowSerializer
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Ingredient."""
 
-    permission_classes = [AllowAny, ]
     queryset = Ingredient.objects.all()
+    permission_classes = [AllowAny, ]
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend, )
-    filterset_class = IngredientFilter
+    filter_class = IngredientFilter
     search_fields = ['^name', ]
 
 
 class TagViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Tag."""
 
+    queryset = Tag.objects.all()
     permission_classes = [AllowAny, ]
     serializer_class = TagSerializer
-    queryset = Tag.objects.all()
 
 
 class RecipeViewSet(
@@ -42,7 +45,9 @@ class RecipeViewSet(
     """Вьюсет для модели Recipe."""
 
     queryset = Recipe.objects.all()
+    permission_classes = (AuthorOrAdminOrReadOnly,)
     pagination_class = CustomPagination
+    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = [DjangoFilterBackend, ]
     filter_class = RecipeFilter
 
@@ -65,15 +70,26 @@ class RecipeViewSet(
             methods=['POST', 'DELETE'],
             permission_classes=[IsAuthenticated, ])
     def favorite(self, request, pk=None):
-        return self.post_delete(Favorite, ShortRecipeSerializer,
-                                request, pk)
+        user = request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        serializer = RecipeFollowSerializer(
+            recipe, context={'request': request})
+
+        if request.method == 'POST':
+            serializer.add_favorite_user(user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if request.method == 'DELETE':
+            serializer.remove_favorite_user(user)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
             methods=['POST', 'DELETE'],
             permission_classes=[IsAuthenticated, ])
-    def shopping_cart(self, request, pk):
-        return self.post_delete(ShoppingCart, ShortRecipeSerializer,
-                                request, pk)
+    def shopping_cart(self, request, pk=None):
+        if request.method == 'POST':
+            return shopping_post(request, pk, ShoppingCart,
+                                 RecipeFollowSerializer)
+        return shopping_delete(request, pk, ShoppingCart)
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):

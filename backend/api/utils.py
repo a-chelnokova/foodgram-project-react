@@ -78,3 +78,27 @@ def subscrib_delete(request, pk, model, model_user):
         {'message': 'Подписка удалена'},
         status=status.HTTP_204_NO_CONTENT
     )
+
+
+def shopping_post(request, pk, model, serializer):
+    """Добавляем рецепт в список покупок"""
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if model.objects.filter(user=request.user, recipe=recipe).exists():
+        return Response({'massage': 'Рецепт уже есть в списке покупок'},
+                        status=status.HTTP_400_BAD_REQUEST)
+    model.objects.get_or_create(user=request.user, recipe=recipe)
+    data = serializer(recipe).data
+    return Response(data, status=status.HTTP_201_CREATED)
+
+
+def shopping_delete(request, pk, model):
+    """Удаляем рецепт из списка покупко"""
+    recipe = get_object_or_404(Recipe, pk=pk)
+    if model.objects.filter(user=request.user, recipe=recipe).exists():
+        follow = get_object_or_404(model, user=request.user, recipe=recipe)
+        follow.delete()
+        return Response(
+            {'massage': 'Рецепт успешно удален из списка покупок'},
+            status=status.HTTP_204_NO_CONTENT)
+    return Response({'message': 'Рецепта нет в списке покупок.'},
+                    status=status.HTTP_400_BAD_REQUEST)

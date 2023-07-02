@@ -25,12 +25,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = [
-            'id',
-            'name',
-            'color',
-            'slug',
-        ]
+        fields = '__all__'
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -67,8 +62,8 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class AddIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления ингредиента в рецепт."""
 
-    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField()
+    id = serializers.IntegerField()
+    amount = serializers.IntegerField(write_only=True, min_value=1)
     recipe = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
@@ -83,16 +78,9 @@ class AddIngredientSerializer(serializers.ModelSerializer):
 class ShoppingCartSerializer(serializers.ModelSerializer):
     """Сериализатор для модели ShoppingCart."""
 
-    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
-    recipe = serializers.HiddenField(default=None)
-
-    def validate_recipe(self, value):
-        recipe_id = self.context['request'].parser_context['kwargs']['pk']
-        return get_object_or_404(Recipe, pk=recipe_id)
-
     class Meta:
-        model = ShoppingCart
-        fields = ('user', 'recipe')
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -128,11 +116,11 @@ class RecipeSerializer(serializers.ModelSerializer):
         ]
 
     def in_list_exists(self, obj, model):
-        request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
+        user = self.context['request'].user
+        if user.is_anonymous:
             return False
         return model.objects.filter(
-            user=request.user,
+            user=user,
             recipe=obj,
         ).exists()
 

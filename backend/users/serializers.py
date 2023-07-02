@@ -1,17 +1,20 @@
 from rest_framework import serializers
+from djoser.serializers import UserCreateSerializer
 
-from api.utils import UserCreateMixin
 from recipes.models import Favorite, Recipe
 from users.models import CustomUser, Subscription
 
 
-class CustomUserCreateSerializer(UserCreateMixin,
-                                 serializers.ModelSerializer):
+class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
-    class Meta:
+    username = serializers.CharField()
+    email = serializers.EmailField()
+
+    class Meta(UserCreateSerializer.Meta):
         model = CustomUser
         fields = [
+            'id',
             'email',
             'username',
             'first_name',
@@ -23,7 +26,9 @@ class CustomUserCreateSerializer(UserCreateMixin,
 class CustomUserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели CustomUser."""
 
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField(
+        method_name='get_is_subscribed'
+    )
 
     class Meta:
         model = CustomUser
@@ -38,7 +43,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
     def get_is_subscribed(self, obj):
         request = self.context.get('request')
-        if request.user.is_anonymous or request is None:
+        if request.user.is_anonymous:
             return False
         return Subscription.objects.filter(
             user=request.user,
