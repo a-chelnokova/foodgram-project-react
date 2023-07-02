@@ -37,9 +37,11 @@ class CustomUserViewSet(UserViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     @action(
-        methods=['post', 'delete'],
         detail=True,
-        permission_classes=(IsAuthenticated,),)
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated, ],
+        url_name='subscribe',
+        url_path='subscribe')
     def subscribe(self, request, id=None):
         """Подписывает пользователя на другого пользователя."""
 
