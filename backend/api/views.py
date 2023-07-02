@@ -25,7 +25,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny, ]
     serializer_class = IngredientSerializer
     filter_backends = (DjangoFilterBackend, )
-    filter_class = IngredientFilter
+    filterset_class = IngredientFilter
     search_fields = ['^name', ]
 
 
@@ -46,9 +46,8 @@ class RecipeViewSet(
     queryset = Recipe.objects.all()
     permission_classes = (AuthorOrAdminOrReadOnly,)
     pagination_class = CustomPagination
-    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = [DjangoFilterBackend, ]
-    filter_class = RecipeFilter
+    filterset_class = RecipeFilter
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH', 'DELETE'):
