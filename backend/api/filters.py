@@ -1,5 +1,6 @@
 from django_filters.rest_framework import FilterSet, filters
-from recipes.models import Ingredient, Recipe
+from recipes.models import Ingredient, Recipe, Tag
+from users.models import CustomUser
 
 
 class IngredientFilter(FilterSet):
@@ -11,13 +12,19 @@ class IngredientFilter(FilterSet):
 
 
 class RecipeFilter(FilterSet):
+    author = filters.ModelChoiceFilter(queryset=CustomUser.objects.all())
+    tags = filters.ModelMultipleChoiceFilter(
+        field_name='tags__slug',
+        queryset=Tag.objects.all(),
+        to_field_name='slug',
+    )
+
     is_favorited = filters.NumberFilter(
         method='filter_is_favorited'
     )
     is_in_shopping_cart = filters.NumberFilter(
         method='filter_is_in_shopping_cart'
     )
-    tags = filters.NumberFilter()
 
     def filter_is_favorited(self, queryset, name, value):
         if value and not self.request.user.is_anonymous:
@@ -34,4 +41,6 @@ class RecipeFilter(FilterSet):
         fields = [
             'tags',
             'author',
+            'in_favorites',
+            'is_in_shopping_cart'
         ]
