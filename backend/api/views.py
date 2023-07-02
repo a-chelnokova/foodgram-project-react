@@ -5,17 +5,16 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
-from api.utils import PostDeleteMixin, shopping_delete, shopping_post
+from api.utils import PostDeleteMixin
 from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
+                            ShoppingCart, Tag, Favorite)
 from users.serializers import RecipeFollowSerializer
 
 
@@ -69,25 +68,14 @@ class RecipeViewSet(
     @action(detail=True,
             methods=['POST', 'DELETE'])
     def favorite(self, request, pk=None):
-        user = request.user
-        recipe = get_object_or_404(Recipe, pk=pk)
-        serializer = RecipeFollowSerializer(
-            recipe, context={'request': request})
-
-        if request.method == 'POST':
-            serializer.add_favorite_user(user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == 'DELETE':
-            serializer.remove_favorite_user(user)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        return self.post_delete(Favorite, RecipeFollowSerializer,
+                                request, pk)
 
     @action(detail=True,
             methods=['POST', 'DELETE'])
     def shopping_cart(self, request, pk=None):
-        if request.method == 'POST':
-            return shopping_post(request, pk, ShoppingCart,
-                                 RecipeFollowSerializer)
-        return shopping_delete(request, pk, ShoppingCart)
+        return self.post_delete(ShoppingCart, RecipeFollowSerializer,
+                                request, pk)
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
