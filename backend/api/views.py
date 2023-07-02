@@ -71,9 +71,9 @@ class RecipeViewSet(
     @action(
         detail=True,
         methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated, ],
         url_name='favorite',
         url_path='favorite',
-        permission_classes=(IsAuthenticated,),
     )
     def favorite(self, request, pk=None):
         return shopcart_or_favorite(
