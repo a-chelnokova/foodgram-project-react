@@ -1,47 +1,40 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
-from api.permissions import AuthorOrReadOnly
 from api.serializers import (IngredientSerializer,
-                             RecipeSerializer, ShortRecipeSerializer,
+                             RecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
 from api.utils import PostDeleteMixin
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
+from api.permissions import AuthorOrAdminOrReadOnly
+from recipes.models import (Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag, Favorite)
+from users.serializers import RecipeFollowSerializer
 
 
-class IngredientViewSet(
-    mixins.RetrieveModelMixin,
-    mixins.ListModelMixin,
-    viewsets.GenericViewSet
-):
+class IngredientViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Ingredient."""
 
-    permission_classes = [AllowAny, ]
-    pagination_class = None
-    serializer_class = IngredientSerializer
     queryset = Ingredient.objects.all()
-    filterset_class = IngredientFilter
+    permission_classes = [AllowAny, ]
+    serializer_class = IngredientSerializer
+    filter_backends = (DjangoFilterBackend, )
+    filter_class = IngredientFilter
     search_fields = ['^name', ]
 
 
-class TagViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
+class TagViewSet(viewsets.ModelViewSet):
     """Вьюсет для модели Tag."""
 
-    permission_classes = [AllowAny, ]
-    pagination_class = None
-    serializer_class = TagSerializer
     queryset = Tag.objects.all()
+    permission_classes = [AllowAny, ]
+    serializer_class = TagSerializer
 
 
 class RecipeViewSet(
@@ -50,33 +43,38 @@ class RecipeViewSet(
 ):
     """Вьюсет для модели Recipe."""
 
-    permission_classes = [AuthorOrReadOnly, ]
-    pagination_class = CustomPagination
     queryset = Recipe.objects.all()
+    permission_classes = (AuthorOrAdminOrReadOnly,)
+    pagination_class = CustomPagination
+    http_method_names = ['get', 'post', 'patch', 'delete']
     filter_backends = [DjangoFilterBackend, ]
-    filterset_class = RecipeFilter
+    filter_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return RecipeSerializer
-        return CreateRecipeSerializer
+        if self.request.method in ('POST', 'PATCH', 'DELETE'):
+            return CreateRecipeSerializer
+        return RecipeSerializer
 
     def perform_create(self, serializer):
         user = self.request.user
         serializer.save(author=user)
 
+    def destroy(self, request, *args, **kwargs):
+        self.perform_destroy(self.get_object())
+        return Response(
+            {'massage': 'Рецепт успешно удален'},
+            status=status.HTTP_204_NO_CONTENT)
+
     @action(detail=True,
-            methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated, ])
+            methods=['POST', 'DELETE'])
     def favorite(self, request, pk=None):
-        return self.post_delete(Favorite, ShortRecipeSerializer,
+        return self.post_delete(Favorite, RecipeFollowSerializer,
                                 request, pk)
 
     @action(detail=True,
-            methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated])
-    def shopping_cart(self, request, pk):
-        return self.post_delete(ShoppingCart, ShortRecipeSerializer,
+            methods=['POST', 'DELETE'])
+    def shopping_cart(self, request, pk=None):
+        return self.post_delete(ShoppingCart, RecipeFollowSerializer,
                                 request, pk)
 
     @action(detail=False, methods=['GET'])
