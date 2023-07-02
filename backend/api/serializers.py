@@ -86,13 +86,15 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe."""
 
+    ingredients = RecipeIngredientSerializer(
+        many=True,
+        read_only=True,
+        source='ingredients_recipe',
+    )
     tags = TagSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
     image = Base64ImageField()
 
-    ingredients = serializers.SerializerMethodField(
-        method_name='get_ingredients'
-    )
     is_favorited = serializers.SerializerMethodField(
         method_name='get_is_favorited'
     )
