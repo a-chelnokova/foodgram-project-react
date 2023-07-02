@@ -70,12 +70,12 @@ class RecipeViewSet(
 
     @action(
         detail=True,
-        methods=['POST', 'DELETE'],
+        methods=['post', 'delete'],
         url_name='favorite',
         url_path='favorite',
         permission_classes=(IsAuthenticated,),
     )
-    def favorite(self, request, pk):
+    def favorite(self, request, pk=None):
         return shopcart_or_favorite(
             self,
             request,
