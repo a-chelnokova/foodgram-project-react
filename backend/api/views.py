@@ -8,7 +8,6 @@ from rest_framework.response import Response
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
-from api.permissions import AuthorOrAdminOrReadOnly
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer, CreateRecipeSerializer)
