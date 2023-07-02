@@ -5,17 +5,20 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer,
-                             RecipeSerializer,
+                             RecipeSerializer, FavoriteSerializer,
                              TagSerializer, CreateRecipeSerializer)
 from api.utils import PostDeleteMixin
 from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag, Favorite)
 from users.serializers import RecipeFollowSerializer
+from api.utils import subscrib_delete, subscrib_post
+from users.models import CustomUser
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -65,11 +68,16 @@ class RecipeViewSet(
             {'massage': 'Рецепт успешно удален'},
             status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True,
-            methods=['POST', 'DELETE'])
-    def favorite(self, request, pk=None):
-        return self.post_delete(Favorite, RecipeFollowSerializer,
-                                request, pk)
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated, ],
+    )
+    def favorite(self, request, id=None):
+        if request.method == 'POST':
+            return subscrib_post(request, id, Favorite, CustomUser,
+                                 FavoriteSerializer)
+        return subscrib_delete(request, id, Favorite, CustomUser)
 
     @action(detail=True,
             methods=['POST', 'DELETE'])
