@@ -1,22 +1,19 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
+from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer, FavoriteSerializer,
-                             TagSerializer, CreateRecipeSerializer)
-from api.utils import PostDeleteMixin, shopcart_or_favorite
+                             TagSerializer)
+from api.utils import PostDeleteMixin
 from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag, Favorite)
-from users.serializers import RecipeFollowSerializer
+                            Tag, Favorite)
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -46,53 +43,23 @@ class RecipeViewSet(
 ):
     """Вьюсет для модели Recipe."""
 
-    queryset = Recipe.objects.all()
-    permission_classes = (AuthorOrAdminOrReadOnly,)
+    permission_classes = [AuthorOrAdminOrReadOnly, ]
     pagination_class = CustomPagination
-    http_method_names = ['get', 'post', 'patch', 'delete']
+    queryset = Recipe.objects.all()
     filter_backends = [DjangoFilterBackend, ]
-    filter_class = RecipeFilter
+    filterset_class = RecipeFilter
+    serializer_class = RecipeSerializer
 
-    def get_serializer_class(self):
-        if self.request.method in ('POST', 'PATCH', 'DELETE'):
-            return CreateRecipeSerializer
-        return RecipeSerializer
+    @action(detail=True, methods=['POST', 'DELETE'], url_path='favorite',
+            permission_classes=[AuthorOrAdminOrReadOnly])
+    def favorite(self, request, id):
+        return self.post_delete(self, Favorite, FavoriteSerializer,
+                                request, id)
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update({'request': self.request})
-        return context
-
-    def get_queryset(self):
-        return Recipe.objects.filter(author__is_active=True)
-
-    def destroy(self, request, *args, **kwargs):
-        self.perform_destroy(self.get_object())
-        return Response(
-            {'massage': 'Рецепт успешно удален'},
-            status=status.HTTP_204_NO_CONTENT)
-
-    @action(
-        detail=True,
-        methods=['post', 'delete'],
-        permission_classes=[IsAuthenticated, ],
-        url_name='favorite',
-        url_path='favorite',
-    )
-    def favorite(self, request, pk=None):
-        return shopcart_or_favorite(
-            self,
-            request,
-            Favorite,
-            FavoriteSerializer,
-            pk,
-        )
-
-    @action(detail=True,
-            methods=['POST', 'DELETE'])
-    def shopping_cart(self, request, pk=None):
-        return self.post_delete(ShoppingCart, RecipeFollowSerializer,
-                                request, pk)
+    @action(detail=True, methods=['POST', 'DELETE'], url_path='shopping_cart',
+            permission_classes=[AuthorOrAdminOrReadOnly])
+    def shopping_cart(self, request, id):
+        pass
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
