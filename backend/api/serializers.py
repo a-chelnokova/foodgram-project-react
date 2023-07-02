@@ -125,7 +125,13 @@ class RecipeSerializer(serializers.ModelSerializer):
         ).exists()
 
     def get_is_favorited(self, obj):
-        return self.in_list_exists(obj, Favorite)
+        request = self.context.get('request')
+        if request.user.is_anonymous:
+            return False
+        return Favorite.objects.filter(
+            user=request.user,
+            author=obj,
+        ).exists()
 
     def get_is_in_shopping_cart(self, obj):
         return self.in_list_exists(obj, ShoppingCart)
