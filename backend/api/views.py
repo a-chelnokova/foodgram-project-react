@@ -58,9 +58,13 @@ class RecipeViewSet(
             return CreateRecipeSerializer
         return RecipeSerializer
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        serializer.save(author=user)
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
+
+    def get_queryset(self):
+        return Recipe.objects.filter(author__is_active=True)
 
     def destroy(self, request, *args, **kwargs):
         self.perform_destroy(self.get_object())

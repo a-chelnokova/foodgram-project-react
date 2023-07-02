@@ -62,14 +62,12 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class AddIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления ингредиента в рецепт."""
 
-    id = serializers.IntegerField()
     amount = serializers.IntegerField(write_only=True, min_value=1)
     recipe = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = RecipeIngredient
         fields = [
-            'id',
             'amount',
             'recipe',
         ]
@@ -144,8 +142,6 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         many=True,
     )
     image = Base64ImageField()
-    author = CustomUserSerializer(read_only=True)
-    cooking_time = serializers.IntegerField(min_value=1)
 
     class Meta:
         model = Recipe
@@ -188,14 +184,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
         for ingredient in ingredients:
             amount = ingredient['amount']
-            ingredient_fr = get_object_or_404(
-                Ingredient,
-                pk=ingredient['id']
-            ),
             ingredient_obj = RecipeIngredient(
                 recipe=recipe,
                 amount=amount,
-                ingredient=ingredient_fr,
+                ingredient=ingredient['id'],
             )
             ings_list.append(ingredient_obj)
 
@@ -204,8 +196,10 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
+        author = self.context.get('request').user
 
-        recipe = Recipe.objects.create(**validated_data)
+        recipe = Recipe.objects.create(**validated_data,
+                                       author=author)
 
         for tag in tags:
             recipe.tags.add(tag)
