@@ -32,6 +32,7 @@ class TagSerializer(serializers.ModelSerializer):
             'slug',
         ]
 
+
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Ingredient."""
 
