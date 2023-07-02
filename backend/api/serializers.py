@@ -160,28 +160,14 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             'image',
         ]
 
-    def validate_ingredients(self, data):
-        if len(data['tags']) == 0:
-            raise serializers.ValidationError('Укажите хотя бы один тег.')
-
-        if len(set(data['tags'])) != len(data['tags']):
-            raise serializers.ValidationError('Теги не должны повторяться.')
-
-        if data.get('cooking_time', 0) < 1:
+    def validate_ingredients(self, ingredients):
+        ing_ids = [ingredient['id'] for ingredient in ingredients]
+        if len(ing_ids) != len(set(ing_ids)):
             raise serializers.ValidationError(
-                'Минимальное время приготовления 1 минута.')
+                'Нельзя дублировать ингредиенты.'
+            )
 
-        if len(data['ingredients']) < 1:
-            raise serializers.ValidationError(
-                'Укажите хотя бы один ингредиент.')
-        ingredients_id = set()
-        for ingredient in data['ingredients']:
-            if ingredient['id'] in ingredients_id:
-                raise serializers.ValidationError(
-                    'Ингредиенты не должны повторяться.')
-            ingredients_id.add(ingredient['id'])
-
-        return data
+        return ingredients
 
     def create_ings(self, ingredients, recipe):
         ings_list = []
