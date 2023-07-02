@@ -62,15 +62,12 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 class AddIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления ингредиента в рецепт."""
 
-    amount = serializers.IntegerField(write_only=True, min_value=1)
-    recipe = serializers.PrimaryKeyRelatedField(read_only=True)
+    id = serializers.PrimaryKeyRelatedField(queryset=Ingredient.objects.all())
+    amount = serializers.IntegerField()
 
     class Meta:
         model = RecipeIngredient
-        fields = [
-            'amount',
-            'recipe',
-        ]
+        fields = ('id', 'amount')
 
 
 class ShoppingCartSerializer(serializers.ModelSerializer):
