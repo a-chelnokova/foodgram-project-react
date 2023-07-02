@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 
@@ -67,8 +67,7 @@ class RecipeViewSet(
             status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
-            methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated, ])
+            methods=['POST', 'DELETE'])
     def favorite(self, request, pk=None):
         user = request.user
         recipe = get_object_or_404(Recipe, pk=pk)
@@ -83,8 +82,7 @@ class RecipeViewSet(
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
-            methods=['POST', 'DELETE'],
-            permission_classes=[IsAuthenticated, ])
+            methods=['POST', 'DELETE'])
     def shopping_cart(self, request, pk=None):
         if request.method == 'POST':
             return shopping_post(request, pk, ShoppingCart,
