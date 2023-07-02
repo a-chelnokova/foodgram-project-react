@@ -8,13 +8,9 @@ from users.models import CustomUser, Subscription
 class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
-    username = serializers.CharField()
-    email = serializers.EmailField()
-
-    class Meta(UserCreateSerializer.Meta):
+    class Meta():
         model = CustomUser
         fields = [
-            'id',
             'email',
             'username',
             'first_name',
