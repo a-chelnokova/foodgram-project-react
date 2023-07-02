@@ -70,7 +70,6 @@ class AddIngredientSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'amount',
-            'recipe',
         ]
 
 
