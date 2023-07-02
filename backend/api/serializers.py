@@ -130,19 +130,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_is_in_shopping_cart(self, obj):
         return self.in_list_exists(obj, ShoppingCart)
 
-    def get_ingredients(self, recipes):
-        ingredient_data = recipes.ingredients.values(
-            'id', 'name', 'measurement_unit', 'recipes__amount')
-        ingredients = [
-            {
-                'id': data['id'],
-                'name': data['name'],
-                'measurement_unit': data['measurement_unit'],
-                'amount': data['recipes__amount']
-            }
-            for data in ingredient_data
-        ]
-        return ingredients
+    def get_ingredients(self, obj):
+        ingredients = RecipeIngredient.objects.filter(recipe=obj)
+        serializer = RecipeIngredientSerializer(ingredients, many=True)
+        return serializer.data
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
