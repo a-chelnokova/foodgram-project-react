@@ -1,5 +1,5 @@
 from django_filters.rest_framework import FilterSet, filters
-from recipes.models import Ingredient, Recipe
+from recipes.models import Ingredient, Recipe, Tag
 from users.models import CustomUser
 
 
@@ -13,9 +13,10 @@ class IngredientFilter(FilterSet):
 
 class RecipeFilter(FilterSet):
     author = filters.ModelChoiceFilter(queryset=CustomUser.objects.all())
-    tags = filters.AllValuesMultipleFilter(
+    tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
-        label='Теги'
+        queryset=Tag.objects.all(),
+        to_field_name='slug',
     )
 
     is_favorited = filters.NumberFilter(
