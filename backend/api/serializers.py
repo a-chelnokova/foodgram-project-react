@@ -83,53 +83,31 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
 class RecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Recipe."""
 
-    tags = TagSerializer(many=True, read_only=True)
+    ingredients = RecipeIngredientSerializer(many=True)
+    tags = TagSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
-    image = Base64ImageField()
-
-    ingredients = serializers.SerializerMethodField(
-        method_name='get_ingredients'
-    )
-    is_favorited = serializers.SerializerMethodField(
-        method_name='get_is_favorited'
-    )
-    is_in_shopping_cart = serializers.SerializerMethodField(
-        method_name='get_is_in_shopping_cart'
-    )
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
-        fields = [
-            'id',
-            'tags',
-            'name',
-            'author',
-            'ingredients',
-            'image',
-            'text',
-            'is_favorited',
-            'is_in_shopping_cart',
-            'cooking_time',
-        ]
+        fields = ('pub_date', 'name', 'ingredients', 'tags', 'text',
+                  'cooking_time', 'image', 'author',
+                  'is_favorited', 'is_in_shopping_cart')
 
-    def in_list_exists(self, obj, model):
+    def get_is_favorited(self, obj):
         user = self.context['request'].user
         if user.is_anonymous:
             return False
-        return model.objects.filter(
-            user=user,
-            recipe=obj,
-        ).exists()
-
-    def get_is_favorited(self, obj):
-        return self.in_list_exists(obj, Favorite)
+        return Favorite.objects.filter(recipe=obj, user=user).exists()
 
     def get_is_in_shopping_cart(self, obj):
-        return self.in_list_exists(obj, ShoppingCart)
-
-    def get_ingredients(self, obj):
-        ingredients = RecipeIngredient.objects.filter(recipe=obj)
-        return RecipeIngredientSerializer(ingredients, many=True).data
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(
+            user=request.user, recipe_id=obj
+        ).exists()
 
 
 class CreateRecipeSerializer(serializers.ModelSerializer):
@@ -147,6 +125,7 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 
     def validate_ingredients(self, ingredients):
         ing_ids = [ingredient['id'] for ingredient in ingredients]
+
         if len(ing_ids) != len(set(ing_ids)):
             raise serializers.ValidationError(
                 'Нельзя дублировать ингредиенты.'
