@@ -82,7 +82,10 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент',
     )
 
-    amount = models.CharField(max_length=20)  # не менялось
+    amount = models.FloatField(
+        verbose_name='Количество ингредиента',
+        validators=(MinValueValidator(
+            1, message='Минимальное количество ингредиентов 1'),))
 
     class Meta:
         verbose_name = 'Количество ингредиента'
@@ -93,6 +96,12 @@ class RecipeIngredient(models.Model):
                 name='recipe_ingredient_unique',
             ),
         ]
+
+    def __str__(self):
+        return (
+            f'{self.recipe.name} - '
+            f'{self.ingredient.name} '
+            f'({self.amount})')
 
 
 class Recipe(models.Model):
@@ -105,32 +114,27 @@ class Recipe(models.Model):
     )
 
     name = models.CharField(
-        max_length=50,
-        unique=True,
+        max_length=150,
         verbose_name='Название рецепта',
     )
 
     ingredients = models.ManyToManyField(
         Ingredient,
         through=RecipeIngredient,
-        through_fields=('recipe', 'ingredient'),
         verbose_name='Ингредиенты',
     )
 
     tags = models.ManyToManyField(
         Tag,
-        db_index=True,
         verbose_name='Теги',
         related_name='recipes',
     )
 
     text = models.TextField(
         verbose_name='Текст рецепта',
-        help_text='Текст рецепта',
     )
 
     cooking_time = models.PositiveSmallIntegerField(
-        null=False,
         verbose_name='Время приготовления',
         validators=[
             MinValueValidator(
@@ -165,30 +169,6 @@ class Recipe(models.Model):
         return self.name
 
 
-class RecipeTag(models.Model):
-    """Модель для связи тегов и рецепта."""
-
-    recipe = models.ForeignKey(
-        Recipe,
-        on_delete=models.CASCADE,
-        verbose_name='Рецепт',
-    )
-
-    tag = models.ForeignKey(
-        Tag,
-        on_delete=models.CASCADE,
-        verbose_name='Тег',
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['recipe', 'tag'],
-                name='recipe_tag_unique',
-            ),
-        ]
-
-
 class Favorite(models.Model):
     """Избранные рецепты пользователя."""
 
@@ -209,13 +189,15 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранный рецепт'
         verbose_name_plural = 'Избранные рецепты'
-        ordering = ['-id']
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
                 name='unique_favorites',
             ),
         ]
+
+    def __str__(self):
+        return f'{self.user} добавил {self.recipe} в избранное'
 
 
 class ShoppingCart(models.Model):
@@ -247,3 +229,6 @@ class ShoppingCart(models.Model):
                 name='unique_shopping_cart',
             ),
         ]
+
+    def __str__(self):
+        return f'{self.user} добавил {self.recipe} в список покупок'
