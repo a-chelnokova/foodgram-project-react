@@ -5,19 +5,20 @@ from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer,
-                             RecipeSerializer,
+                             RecipeSerializer, FavoriteSerializer,
                              TagSerializer, CreateRecipeSerializer)
 from api.utils import PostDeleteMixin
 from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag)
+                            ShoppingCart, Tag, Favorite)
 from users.serializers import RecipeFollowSerializer
-from api.utils import shopping_post, shopping_delete
+from api.utils import subscrib_delete, subscrib_post
+from users.models import CustomUser
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -29,6 +30,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     filter_backends = (DjangoFilterBackend, )
     filter_class = IngredientFilter
     search_fields = ['^name', ]
+    pagination_class = None
 
 
 class TagViewSet(viewsets.ModelViewSet):
@@ -37,6 +39,7 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.all()
     permission_classes = [AllowAny, ]
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class RecipeViewSet(
@@ -67,29 +70,22 @@ class RecipeViewSet(
             {'massage': 'Рецепт успешно удален'},
             status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=['post', 'delete'],)
-    def favorite(self, request, pk=None):
-        """Добавление/удаление рецепта из списка избранных для пользователя."""
-
-        user = request.user
-        recipe = get_object_or_404(Recipe, pk=pk)
-        serializer = RecipeFollowSerializer(
-            recipe, context={'request': request})
-
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated, ],
+    )
+    def favorite(self, request, id=None):
         if request.method == 'POST':
-            serializer.add_favorite_user(user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        if request.method == 'DELETE':
-            serializer.remove_favorite_user(user)
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return subscrib_post(request, id, Favorite, CustomUser,
+                                 FavoriteSerializer)
+        return subscrib_delete(request, id, Favorite, CustomUser)
 
-    @action(detail=True, methods=('post', 'delete'))
+    @action(detail=True,
+            methods=['POST', 'DELETE'])
     def shopping_cart(self, request, pk=None):
-        """Добавление/удаление рецепта из списка покупок для пользователя."""
-        if request.method == 'POST':
-            return shopping_post(request, pk, ShoppingCart,
-                                 RecipeFollowSerializer)
-        return shopping_delete(request, pk, ShoppingCart)
+        return self.post_delete(ShoppingCart, RecipeFollowSerializer,
+                                request, pk)
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
