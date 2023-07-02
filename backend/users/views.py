@@ -1,8 +1,8 @@
+from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from djoser.views import UserViewSet
 
 from api.pagination import CustomPagination
 from api.utils import subscrib_delete, subscrib_post
@@ -10,7 +10,7 @@ from users.models import Subscription, CustomUser
 from users.serializers import SubscriptionSerializer
 
 
-class CustomUserViewSet(UserViewSet):
+class SubscribeView(APIView):
     """ViewSet для работы с пользователями сервиса FoodGram."""
 
     permission_classes = (IsAuthenticatedOrReadOnly,)
