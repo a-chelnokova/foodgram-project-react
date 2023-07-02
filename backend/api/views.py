@@ -18,7 +18,6 @@ from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from users.serializers import RecipeFollowSerializer
 from api.utils import shopping_post, shopping_delete
-from users.models import CustomUser
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
@@ -91,7 +90,6 @@ class RecipeViewSet(
             return shopping_post(request, pk, ShoppingCart,
                                  RecipeFollowSerializer)
         return shopping_delete(request, pk, ShoppingCart)
-
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
