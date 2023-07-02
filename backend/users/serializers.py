@@ -1,11 +1,12 @@
 from rest_framework import serializers
-from djoser.serializers import UserCreateSerializer
 
 from recipes.models import Favorite, Recipe
 from users.models import CustomUser, Subscription
+from api.utils import UserCreateMixin
 
 
-class CustomUserCreateSerializer(UserCreateSerializer):
+class CustomUserCreateSerializer(UserCreateMixin,
+                                 serializers.ModelSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
     class Meta():
