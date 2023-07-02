@@ -93,8 +93,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = serializers.SerializerMethodField(
         method_name='get_ingredients'
     )
-    in_favorites = serializers.SerializerMethodField(
-        method_name='get_in_favorites'
+    is_favorited = serializers.SerializerMethodField(
+        method_name='get_is_favorited'
     )
     is_in_shopping_cart = serializers.SerializerMethodField(
         method_name='get_is_in_shopping_cart'
@@ -110,7 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             'ingredients',
             'image',
             'text',
-            'in_favorites',
+            'is_favorited',
             'is_in_shopping_cart',
             'cooking_time',
         ]
@@ -124,7 +124,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             recipe=obj,
         ).exists()
 
-    def get_in_favorites(self, obj):
+    def get_is_favorited(self, obj):
         return self.in_list_exists(obj, Favorite)
 
     def get_is_in_shopping_cart(self, obj):
