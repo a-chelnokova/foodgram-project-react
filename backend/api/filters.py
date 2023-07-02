@@ -11,11 +11,22 @@ class IngredientFilter(FilterSet):
 
 
 class RecipeFilter(FilterSet):
-    is_favorited = filters.NumberFilter(method='filter_is_favorited')
+    is_favorited = filters.NumberFilter(
+        method='filter_is_favorited'
+    )
+    is_in_shopping_cart = filters.NumberFilter(
+        method='filter_is_in_shopping_cart'
+    )
+    tags = filters.NumberFilter()
 
     def filter_is_favorited(self, queryset, name, value):
         if value and not self.request.user.is_anonymous:
             return queryset.filter(favorite_user=self.request.user)
+        return queryset
+
+    def filter_is_in_shopping_cart(self, queryset, name, value):
+        if value and not self.request.user.is_anonymous:
+            return queryset.filter(shoppingcart_user=self.request.user)
         return queryset
 
     class Meta:
