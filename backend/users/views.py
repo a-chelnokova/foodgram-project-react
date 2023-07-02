@@ -74,3 +74,8 @@ class CustomUserViewSet(UserViewSet):
             'previous': self.paginator.get_previous_link(),
             'results': serializer.data}
         return Response(response_data)
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        instance.set_password(instance.password)
+        instance.save()
