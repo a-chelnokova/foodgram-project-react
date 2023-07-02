@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from django.shortcuts import get_object_or_404
-from django.db import transaction
 
 from api.fields import Base64ImageField
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
