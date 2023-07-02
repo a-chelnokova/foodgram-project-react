@@ -60,10 +60,6 @@ class RecipeViewSet(
         context.update({'request': self.request})
         return context
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        serializer.save(author=user)
-
     def destroy(self, request, *args, **kwargs):
         self.perform_destroy(self.get_object())
         return Response(
