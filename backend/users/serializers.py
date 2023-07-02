@@ -1,20 +1,28 @@
 from rest_framework import serializers
+from djoser.serializers import UserCreateSerializer, UserSerializer
+from django.db import transaction
 
 from recipes.models import Favorite, Recipe
 from users.models import CustomUser, Subscription
-from api.utils import UserCreateMixin
 
 
-class CustomUserCreateSerializer(UserCreateMixin,
-                                 serializers.ModelSerializer):
+class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор для регистрации новых пользователей."""
 
-    class Meta():
+    class Meta:
         model = CustomUser
-        fields = '__all__'
+        fields = ('email', 'id', 'username', 'first_name', 'last_name',
+                  'password')
+
+    @transaction.atomic
+    def create(self, validated_data):
+        user = super(CustomUserCreateSerializer, self).create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
 
 
-class CustomUserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(UserSerializer):
     """Сериализатор для модели CustomUser."""
 
     is_subscribed = serializers.SerializerMethodField(

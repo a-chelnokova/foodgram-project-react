@@ -1,10 +1,11 @@
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status, mixins
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 
 from api.filters import IngredientFilter, RecipeFilter
 from api.pagination import CustomPagination
@@ -18,7 +19,7 @@ from recipes.models import (Ingredient, Recipe, RecipeIngredient,
 from users.serializers import RecipeFollowSerializer
 
 
-class IngredientViewSet(viewsets.ModelViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Ingredient."""
 
     queryset = Ingredient.objects.all()
@@ -29,11 +30,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     search_fields = ['^name', ]
 
 
-class TagViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
+class TagViewSet(viewsets.ReadOnlyModelViewSet):
     """Вьюсет для модели Tag."""
 
     permission_classes = [AllowAny, ]
@@ -43,8 +40,8 @@ class TagViewSet(
 
 
 class RecipeViewSet(
-    PostDeleteMixin,
-    viewsets.ModelViewSet
+    viewsets.ModelViewSet,
+    PostDeleteMixin
 ):
     """Вьюсет для модели Recipe."""
 
@@ -59,20 +56,28 @@ class RecipeViewSet(
             return CreateRecipeSerializer
         return RecipeSerializer
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update({'request': self.request})
-        return context
+    @staticmethod
+    def create_object(request, pk, serializers):
+        data = {'user': request.user.id, 'recipe': pk}
+        serializer = serializers(data=data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def perform_create(self, serializer):
-        user = self.request.user
-        serializer.save(author=user)
+    @staticmethod
+    def delete_object(request, pk, model):
+        user = request.user
+        recipe = get_object_or_404(Recipe, pk=pk)
+        object = get_object_or_404(model, user=user, recipe=recipe)
+        object.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def destroy(self, request, *args, **kwargs):
-        self.perform_destroy(self.get_object())
-        return Response(
-            {'massage': 'Рецепт успешно удален'},
-            status=status.HTTP_204_NO_CONTENT)
+    def _create_or_destroy(self, http_method, recipe, key,
+                           model, serializer):
+        if http_method == 'POST':
+            return self.create_object(request=recipe, pk=key,
+                                      serializers=serializer)
+        return self.delete_object(request=recipe, pk=key, model=model)
 
     @action(detail=True,
             methods=['POST', 'DELETE'])
