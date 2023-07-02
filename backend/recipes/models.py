@@ -32,6 +32,7 @@ class Tag(models.Model):
     slug = models.SlugField(
         max_length=50,
         unique=True,
+        db_index=True,
         verbose_name='Слаг',
     )
 
