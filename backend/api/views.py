@@ -17,7 +17,6 @@ from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag, Favorite)
 from users.serializers import RecipeFollowSerializer
-from api.utils import shopping_post, shopping_delete
 
 
 class IngredientViewSet(viewsets.ModelViewSet):
