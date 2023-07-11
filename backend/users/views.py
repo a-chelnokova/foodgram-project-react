@@ -3,7 +3,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework import generics
 
 from api.pagination import CustomPagination
 from api.utils import subscrib_delete, subscrib_post
