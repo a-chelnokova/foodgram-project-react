@@ -20,7 +20,7 @@ class SubscribeView(generics.ListCreateAPIView):
 
     @action(
         detail=True,
-        methods=['post', 'delete'],
+        methods=['POST', 'DELETE'],
         permission_classes=[IsAuthenticated, ],
         url_name='subscribe',
         url_path='subscribe')
@@ -33,7 +33,7 @@ class SubscribeView(generics.ListCreateAPIView):
         return subscrib_delete(request, id, Subscription, CustomUser)
 
     @action(
-        methods=['get'],
+        methods=['GET'],
         detail=False,
         permission_classes=(IsAuthenticated,),)
     def subscriptions(self, request):
