@@ -1,8 +1,9 @@
-from rest_framework.views import APIView
+#  from rest_framework.views import APIView
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
+from rest_framework import generics
 
 from api.pagination import CustomPagination
 from api.utils import subscrib_delete, subscrib_post
@@ -10,7 +11,7 @@ from users.models import Subscription, CustomUser
 from users.serializers import SubscriptionSerializer
 
 
-class SubscribeView(APIView):
+class SubscribeView(generics.ListCreateAPIView):
     """ViewSet для работы с пользователями сервиса FoodGram."""
 
     permission_classes = (IsAuthenticatedOrReadOnly,)
