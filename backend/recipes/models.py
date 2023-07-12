@@ -66,45 +66,6 @@ class Ingredient(models.Model):
         return f'{self.name} {self.measurement_unit}'
 
 
-class RecipeIngredient(models.Model):
-    """Необходимое количество ингредиентов."""
-
-    recipe = models.ForeignKey(
-        'Recipe',
-        on_delete=models.CASCADE,
-        related_name='ingredient_in_recipe',
-        verbose_name='Рецепт',
-    )
-
-    ingredient = models.ForeignKey(
-        Ingredient,
-        on_delete=models.CASCADE,
-        related_name='ingredient',
-        verbose_name='Ингредиент',
-    )
-
-    amount = models.FloatField(
-        verbose_name='Количество ингредиента',
-        validators=(MinValueValidator(
-            1, message='Минимальное количество ингредиентов 1'),))
-
-    class Meta:
-        verbose_name = 'Количество ингредиента'
-        verbose_name_plural = 'Количество ингредиентов'
-        constraints = [
-            models.UniqueConstraint(
-                fields=['recipe', 'ingredient'],
-                name='recipe_ingredient_unique',
-            ),
-        ]
-
-    def __str__(self):
-        return (
-            f'{self.recipe.name} - '
-            f'{self.ingredient.name} '
-            f'({self.amount})')
-
-
 class Recipe(models.Model):
     """Рецепты."""
 
@@ -121,7 +82,7 @@ class Recipe(models.Model):
 
     ingredients = models.ManyToManyField(
         Ingredient,
-        through=RecipeIngredient,
+        through='RecipeIngredient',
         related_name='recipes',
         verbose_name='Ингредиенты',
     )
@@ -168,6 +129,45 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecipeIngredient(models.Model):
+    """Необходимое количество ингредиентов."""
+
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='ingredient_in_recipe',
+        verbose_name='Рецепт',
+    )
+
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='ingredient',
+        verbose_name='Ингредиент',
+    )
+
+    amount = models.FloatField(
+        verbose_name='Количество ингредиента',
+        validators=(MinValueValidator(
+            1, message='Минимальное количество ингредиентов 1'),))
+
+    class Meta:
+        verbose_name = 'Количество ингредиента'
+        verbose_name_plural = 'Количество ингредиентов'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['recipe', 'ingredient'],
+                name='recipe_ingredient_unique',
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f'{self.recipe.name} - '
+            f'{self.ingredient.name} '
+            f'({self.amount})')
 
 
 class Favorite(models.Model):
