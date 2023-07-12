@@ -43,7 +43,7 @@ class RecipeAdmin(ModelAdmin):
     def get_author(self, obj):
         return obj.author.email
 
-    @display(description='Тэги')
+    @display(description='Теги')
     def get_tags(self, obj):
         list_ = [_.name for _ in obj.tags.all()]
         return ', '.join(list_)
@@ -53,7 +53,7 @@ class RecipeAdmin(ModelAdmin):
         return '\n '.join([
             f'{item["ingredient__name"]} - {item["amount"]}'
             f' {item["ingredient__measurement_unit"]}.'
-            for item in obj.recipe.values(
+            for item in obj.values(
                 'ingredient__name',
                 'amount', 'ingredient__measurement_unit')])
 
