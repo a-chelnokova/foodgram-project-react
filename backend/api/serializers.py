@@ -172,22 +172,11 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
         return ingredients
 
     def create_ings(self, ingredients, recipe):
-        ings_list = []
-
         for ingredient in ingredients:
-            amount = ingredient['amount']
-            ingredient_fr = get_object_or_404(
-                Ingredient,
-                pk=ingredient['id']
-            ),
-            ingredient_obj = RecipeIngredient(
+            RecipeIngredient.objects.create(
                 recipe=recipe,
-                amount=amount,
-                ingredient=ingredient_fr,
-            )
-            ings_list.append(ingredient_obj)
-
-        RecipeIngredient.objects.bulk_create(ings_list)
+                ingredient_id=ingredient.get('id'),
+                amount=ingredient.get('amount'), )
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
