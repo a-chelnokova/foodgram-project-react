@@ -86,6 +86,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(
         many=True,
         read_only=True,
+        source='recipeingredient_set',
     )
     tags = TagSerializer(many=True)
     author = CustomUserSerializer(read_only=True)
