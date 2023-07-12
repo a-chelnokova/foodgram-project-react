@@ -6,25 +6,25 @@ from recipes.models import (Favorite, Ingredient, Recipe,
 
 @register(Tag)
 class TagAdmin(ModelAdmin):
-    list_display = ('name', 'slug', 'color')
+    list_display = ['name', 'slug', 'color']
 
 
 @register(Ingredient)
 class IngredientAdmin(ModelAdmin):
-    list_display = ('name', 'measurement_unit')
-    list_filter = ('name',)
+    list_display = ['name', 'measurement_unit']
+    search_fields = ['name']
 
 
 class IngredientsInLine(StackedInline):
     model = RecipeIngredient
-    autocomplete_fields = ('ingredient',)
+    autocomplete_fields = ['ingredient',]
 
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
-    list_display = ('id', 'name', 'author', 'favorites')
-    list_filter = ('tags')
-    search_fields = ('name', 'author__username')
+    list_display = ['id', 'name', 'author', 'in_favorite_count']
+    list_filter = ['tags']
+    search_fields = ['name', 'author__username']
     inlines = (IngredientsInLine, )
 
     def in_favorite_count(self, obj):
