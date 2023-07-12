@@ -19,6 +19,7 @@ class IngredientsInLine(StackedInline):
     model = RecipeIngredient
     autocomplete_fields = ('ingredient',)
 
+
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
     list_display = ('id', 'name', 'author', 'favorites')
