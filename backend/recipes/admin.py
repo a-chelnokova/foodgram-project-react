@@ -1,7 +1,7 @@
-from django.contrib.admin import ModelAdmin, register, TabularInline
+from django.contrib.admin import ModelAdmin, register, StackedInline
 
 from recipes.models import (Favorite, Ingredient, Recipe,
-                            ShoppingCart, Tag)
+                            ShoppingCart, Tag, RecipeIngredient)
 
 
 @register(Tag)
@@ -15,9 +15,9 @@ class IngredientAdmin(ModelAdmin):
     list_filter = ('name',)
 
 
-class IngredientsInLine(TabularInline):
-    model = Recipe.ingredients.through
-
+class IngredientsInLine(StackedInline):
+    model = RecipeIngredient
+    autocomplete_fields = ('ingredient',)
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
