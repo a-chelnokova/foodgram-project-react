@@ -22,13 +22,13 @@ class IngredientsInLine(StackedInline):
 
 @register(Recipe)
 class RecipeAdmin(ModelAdmin):
-    list_display = ['id', 'name', 'author', 'in_favorite_count']
+    list_display = ['id', 'name', 'author', 'is_favorited_count']
     list_filter = ['tags']
     search_fields = ['name', 'author__username']
     inlines = (IngredientsInLine, )
 
-    def in_favorite_count(self, obj):
-        return obj.in_favourites.count()
+    def is_favorited_count(self, obj):
+        return obj.is_favorited.count()
 
 
 @register(Favorite)
