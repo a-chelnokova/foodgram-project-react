@@ -55,7 +55,6 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'measurement_unit',
-            'amount',
         ]
 
 
