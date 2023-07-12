@@ -17,7 +17,7 @@ class IngredientAdmin(ModelAdmin):
 
 class IngredientsInLine(StackedInline):
     model = RecipeIngredient
-    autocomplete_fields = ['ingredient',]
+    autocomplete_fields = ['ingredient', ]
 
 
 @register(Recipe)
