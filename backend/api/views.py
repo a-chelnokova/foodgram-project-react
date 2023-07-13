@@ -85,7 +85,7 @@ class RecipeViewSet(
         url_path='download_shopping_cart',
         permission_classes=[IsAuthenticated, ]
     )
-    def download_shopping_cart(request):
+    def download_shopping_cart(self, request):
         ingredient_list = "Cписок покупок:"
         ingredients = RecipeIngredient.objects.filter(
             recipe__is_in_shopping_cart__user=request.user
