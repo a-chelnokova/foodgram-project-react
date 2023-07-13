@@ -93,7 +93,7 @@ class RecipeViewSet(
         if user.is_anonymous:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         ingredients = RecipeIngredient.objects.filter(
-            recipe__shopping_cart__user=request.user
+            recipe__is_in_shopping_cart__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(ingredient_amount=Sum('amount')).values_list(
