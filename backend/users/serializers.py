@@ -2,7 +2,7 @@ from rest_framework import serializers
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from django.db import transaction
 
-# from recipes.models import Favorite, Recipe
+from recipes.models import Favorite, Recipe
 from users.models import CustomUser, Subscription
 
 
@@ -50,7 +50,6 @@ class CustomUserSerializer(UserSerializer):
         ).exists()
 
 
-"""
 class RecipeFollowSerializer(serializers.ModelSerializer):
 
     def is_favorite_user(self, user):
@@ -82,9 +81,9 @@ class RecipeFollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')"""
+        fields = ('id', 'name', 'image', 'cooking_time')
 
-"""
+
 class SubscriptionSerializer(serializers.ModelSerializer):
 
     id = serializers.ReadOnlyField(source='author.id')
@@ -124,4 +123,4 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author=obj.author)
         if limit:
             queryset = queryset[:int(limit)]
-        return RecipeFollowSerializer(queryset, many=True).data"""
+        return RecipeFollowSerializer(queryset, many=True).data
