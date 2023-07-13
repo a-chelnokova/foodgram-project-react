@@ -92,7 +92,7 @@ class RecipeViewSet(
             recipe__is_in_shopping_cart__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(amount_sum=Sum(int('amount')))
+        ).annotate(amount_sum=Sum('amount'))
         for num, i in enumerate(ingredients):
             ingredient_list += (
                 f"\n{i['ingredient__name']} - "
