@@ -148,10 +148,10 @@ class RecipeIngredient(models.Model):
         verbose_name='Ингредиент',
     )
 
-    amount = models.FloatField(
+    amount = models.CharField(
         verbose_name='Количество ингредиента',
-        validators=(MinValueValidator(
-            1, message='Минимальное количество ингредиентов 1'),))
+        max_length=4,
+    )
 
     class Meta:
         verbose_name = 'Количество ингредиента'
