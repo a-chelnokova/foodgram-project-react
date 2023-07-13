@@ -152,7 +152,7 @@ class RecipeIngredient(models.Model):
         verbose_name='Количество ингредиента',
         validators=(MinValueValidator(
             1, message='Минимальное количество ингредиентов 1'),)
-        )
+    )
 
     class Meta:
         verbose_name = 'Количество ингредиента'
