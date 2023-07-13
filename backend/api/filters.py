@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filter
 from django_filters.rest_framework import FilterSet
 import django_filters as filters
-from recipes.models import Recipe, Tag, Ingredient
+from recipes.models import Recipe, Tag, Ingredient, Favorite
 from users.models import CustomUser
 
 
@@ -35,7 +35,7 @@ class RecipeFilter(filter.FilterSet):
                 shopping_cart__user=self.request.user
             )
         if name == 'is_favorited' and value:
-            queryset = queryset.filter(
+            queryset = Favorite.objects.filter(
                 favorites__user=self.request.user
             )
         return queryset
