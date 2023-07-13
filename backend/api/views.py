@@ -11,7 +11,6 @@ from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer,
                              TagSerializer, CreateRecipeSerializer,
-                             FavoriteSerializer,
                              ShortRecipeSerializer)
 from api.utils import PostDeleteMixin
 from api.permissions import AuthorOrAdminOrReadOnly
@@ -74,7 +73,7 @@ class RecipeViewSet(
     @action(detail=True,
             methods=['POST', 'DELETE'])
     def favorite(self, request, pk=None):
-        return self.post_delete(Favorite, FavoriteSerializer,
+        return self.post_delete(Favorite, ShortRecipeSerializer,
                                 request, pk)
 
     @action(detail=True,
