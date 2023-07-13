@@ -19,7 +19,7 @@ class IngredientAdmin(ModelAdmin):
         'name',
         'measurement_unit',
     ]
-    search_fields = ['name',]
+    search_fields = ['name', ]
 
 
 class IngredientsInLine(StackedInline):
@@ -35,7 +35,7 @@ class RecipeAdmin(ModelAdmin):
         'author',
         'is_favorited_count',
     ]
-    list_filter = ['tags',]
+    list_filter = ['tags', ]
     search_fields = [
         'name',
         'author__username',
