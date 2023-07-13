@@ -216,7 +216,8 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализтор для списка избранного."""
     recipe = ShortRecipeSerializer()
+    author = serializers.ReadOnlyField(source='recipe.author')
 
     class Meta:
         model = Favorite
-        fields = ('id', 'user', 'recipe',)
+        fields = ('id', 'author', 'recipe',)
