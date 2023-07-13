@@ -22,33 +22,22 @@ class RecipeFilter(filter.FilterSet):
         to_field_name='slug',
     )
 
-    is_favorited = filters.BooleanFilter(
-        field_name='is_favorited', method='filter'
+    is_favorited = filter.BooleanFilter(
+        method='filter_is_favorited'
     )
-    is_in_shopping_cart = filters.BooleanFilter(
-        widget=filters.widgets.BooleanWidget(),
-        label='В корзине.')
+    is_in_shopping_cart = filter.BooleanFilter(
+        method='filter_is_in_shopping_cart'
+    )
 
-    def filter(self, queryset, name, value):
-        if name == 'is_in_shopping_cart' and value:
-            queryset = queryset.filter(
-                shopping_cart__user=self.request.user
-            )
-        if name == 'is_favorited' and value:
-            queryset = Recipe.objects.filter(
-                favorites__user=self.request.user
-            )
-        return queryset
-
-    """def filter_is_favorited(self, queryset, name, value):
+    def filter_is_favorited(self, queryset, name, value):
         if value and not self.request.user.is_anonymous:
-            return queryset.filter(favorite_recipes__user=self.request.user)
+            return queryset.filter(favorites__user=self.request.user)
         return queryset
 
     def filter_is_in_shopping_cart(self, queryset, name, value):
         if value and not self.request.user.is_anonymous:
-            return queryset.filter(shopping_recipes__user=self.request.user)
-        return queryset"""
+            return queryset.filter(shopping_cart__user=self.request.user)
+        return queryset
 
     class Meta:
         model = Recipe
