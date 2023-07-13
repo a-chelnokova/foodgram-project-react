@@ -64,7 +64,6 @@ class AddIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор для добавления ингредиента в рецепт."""
 
     id = serializers.IntegerField()
-    amount = serializers.CharField()
 
     class Meta:
         model = RecipeIngredient
