@@ -1,5 +1,5 @@
 from api.fields import Base64ImageField
-from recipes.models import (Favorite, Recipe, RecipeIngredient,
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
 from rest_framework import serializers
 from users.serializers import CustomUserSerializer
@@ -28,6 +28,18 @@ class TagSerializer(serializers.ModelSerializer):
             'name',
             'color',
             'slug',
+        ]
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели Ingredient."""
+
+    class Meta:
+        model = Ingredient
+        fields = [
+            'id',
+            'name',
+            'measurement_unit',
         ]
 
 
@@ -65,6 +77,14 @@ class AddIngredientSerializer(serializers.ModelSerializer):
             'amount',
             'recipe',
         ]
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели ShoppingCart."""
+
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
