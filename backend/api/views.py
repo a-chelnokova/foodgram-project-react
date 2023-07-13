@@ -23,7 +23,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     permission_classes = [AllowAny, ]
     serializer_class = IngredientSerializer
-    filter_backends = (DjangoFilterBackend, )
+    filter_backends = [DjangoFilterBackend, ]
     filterset_class = IngredientFilter
     search_fields = ['^name', ]
 
@@ -44,7 +44,7 @@ class RecipeViewSet(
     """Вьюсет для модели Recipe."""
 
     queryset = Recipe.objects.all()
-    permission_classes = (AuthorOrAdminOrReadOnly,)
+    permission_classes = [AuthorOrAdminOrReadOnly, ]
     pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_class = RecipeFilter
@@ -66,19 +66,32 @@ class RecipeViewSet(
         self.perform_destroy(self.get_object())
         return Response(
             {'massage': 'Рецепт успешно удален'},
-            status=status.HTTP_204_NO_CONTENT)
+            status=status.HTTP_204_NO_CONTENT
+        )
 
-    @action(detail=True,
-            methods=['POST', 'DELETE'])
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+    )
     def favorite(self, request, pk=None):
-        return self.post_delete(Favorite, ShortRecipeSerializer,
-                                request, pk)
+        return self.post_delete(
+            Favorite,
+            ShortRecipeSerializer,
+            request,
+            pk,
+        )
 
-    @action(detail=True,
-            methods=['POST', 'DELETE'])
+    @action(
+        detail=True,
+        methods=['POST', 'DELETE'],
+    )
     def shopping_cart(self, request, pk=None):
-        return self.post_delete(ShoppingCart, ShortRecipeSerializer,
-                                request, pk)
+        return self.post_delete(
+            ShoppingCart,
+            ShortRecipeSerializer,
+            request,
+            pk,
+        )
 
     @action(
         detail=False,

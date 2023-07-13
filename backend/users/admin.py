@@ -6,14 +6,30 @@ from users.models import CustomUser, Subscription
 
 
 class CustomUserAdmin(UserAdmin):
-    list_display = ['pk', 'username', 'email', 'first_name', 'last_name']
-    list_filter = ['email', 'username']
+    list_display = [
+        'pk',
+        'username',
+        'email',
+        'first_name',
+        'last_name',
+    ]
+    list_filter = [
+        'email',
+        'username',
+    ]
 
 
 @register(Subscription)
 class SubscriptionAdmin(admin.ModelAdmin):
-    list_display = ('pk', 'user', 'author')
-    list_filter = ('user', 'author')
+    list_display = [
+        'pk',
+        'user',
+        'author',
+    ]
+    list_filter = [
+        'user',
+        'author',
+    ]
     empty_value_display = '-пусто-'
 
 

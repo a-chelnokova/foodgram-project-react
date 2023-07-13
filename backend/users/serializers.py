@@ -2,7 +2,8 @@ from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework import serializers
 
-from recipes.models import Favorite, Recipe
+from recipes.models import Recipe
+from api.serializers import ShortRecipeSerializer
 from users.models import CustomUser, Subscription
 
 
@@ -11,8 +12,14 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'id', 'username', 'first_name', 'last_name',
-                  'password')
+        fields = [
+            'email',
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+            'password',
+        ]
 
     @transaction.atomic
     def create(self, validated_data):
@@ -50,41 +57,8 @@ class CustomUserSerializer(UserSerializer):
         ).exists()
 
 
-class RecipeFollowSerializer(serializers.ModelSerializer):
-
-    def is_favorite_user(self, user):
-        return Favorite.objects.filter(
-            user=user, recipe=self.instance).exists()
-
-    def add_favorite_user(self, user):
-        favorite, created = Favorite.objects.get_or_create(
-            user=user, recipe=self.instance)
-        if not created:
-            raise serializers.ValidationError('Рецепт уже в избранном')
-
-    def remove_favorite_user(self, user):
-        favorite = Favorite.objects.filter(user=user, recipe=self.instance)
-        if favorite:
-            favorite.delete()
-        else:
-            raise serializers.ValidationError('Рецепта нет в избранном')
-
-    def validate(self, data):
-        user = self.context['request'].user
-        if self.context['request'].method == 'POST' and \
-                self.is_favorite_user(user):
-            raise serializers.ValidationError('Рецепт уже в избранном')
-        if self.context['request'].method == 'DELETE' and \
-                not self.is_favorite_user(user):
-            raise serializers.ValidationError('Рецепта нет в избранном')
-        return data
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
-
-
 class SubscriptionSerializer(serializers.ModelSerializer):
+    """Сериализатор для подписок."""
 
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')
@@ -123,4 +97,4 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author=obj.author)
         if limit:
             queryset = queryset[:int(limit)]
-        return RecipeFollowSerializer(queryset, many=True).data
+        return ShortRecipeSerializer(queryset, many=True).data

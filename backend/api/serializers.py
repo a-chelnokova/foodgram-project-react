@@ -206,13 +206,3 @@ class CreateRecipeSerializer(serializers.ModelSerializer):
             self.create_ings(ingredients, recipe=instance)
 
         return instance
-
-
-class FavoriteSerializer(serializers.ModelSerializer):
-    """Сериализтор для списка избранного."""
-    recipe = ShortRecipeSerializer()
-    author = serializers.ReadOnlyField(source='recipe.author')
-
-    class Meta:
-        model = Favorite
-        fields = ('id', 'author', 'recipe',)

@@ -1,7 +1,7 @@
 from djoser.views import UserViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+                                        IsAuthenticatedOrReadOnly,)
 from rest_framework.response import Response
 
 from api.pagination import CustomPagination
@@ -11,9 +11,9 @@ from users.serializers import SubscriptionSerializer
 
 
 class SubscribeView(UserViewSet):
-    """ViewSet для работы с пользователями сервиса FoodGram."""
+    """Вьюсет для подписок."""
 
-    permission_classes = (IsAuthenticatedOrReadOnly,)
+    permission_classes = (IsAuthenticatedOrReadOnly, )
     queryset = CustomUser.objects.all().order_by('-date_joined')
     pagination_class = CustomPagination
 
@@ -24,22 +24,26 @@ class SubscribeView(UserViewSet):
         url_name='subscribe',
         url_path='subscribe')
     def subscribe(self, request, id=None):
-        """Подписывает пользователя на другого пользователя."""
-
         if request.method == 'POST':
-            return subscrib_post(request, id, Subscription, CustomUser,
-                                 SubscriptionSerializer)
-        return subscrib_delete(request, id, Subscription, CustomUser)
+            return subscrib_post(
+                request,
+                id,
+                Subscription,
+                CustomUser,
+                SubscriptionSerializer,
+            )
+        return subscrib_delete(
+            request,
+            id,
+            Subscription,
+            CustomUser,
+        )
 
     @action(
         methods=['GET'],
         detail=False,
-        permission_classes=(IsAuthenticated,),)
+        permission_classes=(IsAuthenticated, ),)
     def subscriptions(self, request):
-        """
-        Возвращает список пользователей, на которых
-        подписан текущий пользователь.
-        """
         user = request.user
         queryset = Subscription.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)

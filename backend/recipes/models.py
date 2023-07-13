@@ -124,8 +124,11 @@ class Recipe(models.Model):
         verbose_name_plural = 'Рецепты'
         ordering = ['-pub_date']
         constraints = [
-            models.UniqueConstraint(fields=['name', 'author'],
-                                    name='recipe_author_unique')]
+            models.UniqueConstraint(
+                fields=['name', 'author'],
+                name='recipe_author_unique'
+            )
+        ]
 
     def __str__(self):
         return self.name
@@ -150,8 +153,11 @@ class RecipeIngredient(models.Model):
 
     amount = models.IntegerField(
         verbose_name='Количество ингредиента',
-        validators=(MinValueValidator(
-            1, message='Минимальное количество ингредиентов 1'),)
+        validators=[
+            MinValueValidator(
+                1, message='Минимальное количество ингредиентов 1'
+            ),
+        ]
     )
 
     class Meta:
