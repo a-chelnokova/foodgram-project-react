@@ -76,6 +76,30 @@ class RecipeViewSet(
         return self.post_delete(Favorite, ShortRecipeSerializer,
                                 request, pk)
 
+    @action(
+        methods=['GET'],
+        detail=False,)
+    def favorites(self, request):
+        """
+        Возвращает список пользователей, на которых
+        подписан текущий пользователь.
+        """
+        user = request.user
+        queryset = Favorite.objects.filter(user=user)
+        pages = self.paginate_queryset(queryset)
+        serializer = ShortRecipeSerializer(
+            pages,
+            many=True,
+            context={'request': request}
+        )
+
+        response_data = {
+            'count': len(pages),
+            'next': self.paginator.get_next_link(),
+            'previous': self.paginator.get_previous_link(),
+            'results': serializer.data}
+        return Response(response_data)
+
     @action(detail=True,
             methods=['POST', 'DELETE'])
     def shopping_cart(self, request, pk=None):
