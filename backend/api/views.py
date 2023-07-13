@@ -5,15 +5,15 @@ from api.serializers import (CreateRecipeSerializer, IngredientSerializer,
                              RecipeSerializer, ShortRecipeSerializer,
                              TagSerializer)
 from api.utils import PostDeleteMixin
-from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+from recipes.models import (Favorite, Ingredient, Recipe,
                             ShoppingCart, Tag)
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -79,7 +79,12 @@ class RecipeViewSet(
         return self.post_delete(ShoppingCart, ShortRecipeSerializer,
                                 request, pk)
 
-    @action(detail=False, methods=['GET'])
+    @action(
+        detail=False,
+        methods=['GET'],
+        url_path='download_shopping_cart',
+        permission_classes=[IsAuthenticated, ]
+    )
     def download_shopping_cart(self, request):
         shopping_cart = ShoppingCart.objects.filter(user=request.user).all()
         shopping_list = {}
