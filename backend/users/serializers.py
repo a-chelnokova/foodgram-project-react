@@ -1,7 +1,8 @@
 from django.db import transaction
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import Favorite, Recipe
 from rest_framework import serializers
+
+from recipes.models import Favorite, Recipe
 from users.models import CustomUser, Subscription
 
 
