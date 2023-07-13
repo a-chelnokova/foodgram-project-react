@@ -1,22 +1,19 @@
+from api.filters import IngredientFilter, RecipeFilter
+from api.pagination import CustomPagination
+from api.permissions import AuthorOrAdminOrReadOnly
+from api.serializers import (CreateRecipeSerializer, IngredientSerializer,
+                             RecipeSerializer, ShortRecipeSerializer,
+                             TagSerializer)
+from api.utils import PostDeleteMixin
 from django.db.models import Sum
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import viewsets, status
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
+from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from rest_framework import filters
-
-from api.pagination import CustomPagination
-from api.serializers import (IngredientSerializer,
-                             RecipeSerializer,
-                             TagSerializer, CreateRecipeSerializer,
-                             ShortRecipeSerializer)
-from api.utils import PostDeleteMixin
-from api.permissions import AuthorOrAdminOrReadOnly
-from recipes.models import (Ingredient, Recipe, RecipeIngredient,
-                            ShoppingCart, Tag, Favorite)
-from api.filters import IngredientFilter, RecipeFilter
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):

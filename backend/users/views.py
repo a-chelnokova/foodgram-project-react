@@ -1,12 +1,11 @@
+from api.pagination import CustomPagination
+from api.utils import subscrib_delete, subscrib_post
 from djoser.views import UserViewSet
 from rest_framework.decorators import action
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-
-from api.pagination import CustomPagination
-from api.utils import subscrib_delete, subscrib_post
-from users.models import Subscription, CustomUser
+from users.models import CustomUser, Subscription
 from users.serializers import SubscriptionSerializer
 
 

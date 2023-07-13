@@ -1,7 +1,6 @@
-from django.contrib.admin import ModelAdmin, register, StackedInline
-
-from recipes.models import (Favorite, Ingredient, Recipe,
-                            ShoppingCart, Tag, RecipeIngredient)
+from django.contrib.admin import ModelAdmin, StackedInline, register
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 
 
 @register(Tag)
