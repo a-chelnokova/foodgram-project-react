@@ -50,8 +50,8 @@ class CustomUserSerializer(UserSerializer):
         ).exists()
 
 
+"""
 class RecipeFollowSerializer(serializers.ModelSerializer):
-    """Сериализатор для получение информации о рецепте."""
 
     def is_favorite_user(self, user):
         return Favorite.objects.filter(
@@ -82,11 +82,10 @@ class RecipeFollowSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
+        fields = ('id', 'name', 'image', 'cooking_time')"""
 
-
+"""
 class SubscriptionSerializer(serializers.ModelSerializer):
-    """Сериализатор для отображения подписок пользователя."""
 
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(source='author.username')
@@ -125,4 +124,4 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author=obj.author)
         if limit:
             queryset = queryset[:int(limit)]
-        return RecipeFollowSerializer(queryset, many=True).data
+        return RecipeFollowSerializer(queryset, many=True).data"""

@@ -10,12 +10,13 @@ from rest_framework import filters
 from api.pagination import CustomPagination
 from api.serializers import (IngredientSerializer,
                              RecipeSerializer,
-                             TagSerializer, CreateRecipeSerializer)
+                             TagSerializer, CreateRecipeSerializer,
+                             FavoriteSerializer,
+                             ShortRecipeSerializer)
 from api.utils import PostDeleteMixin
 from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag, Favorite)
-from users.serializers import RecipeFollowSerializer
 from api.filters import IngredientFilter, RecipeFilter
 
 
@@ -73,13 +74,13 @@ class RecipeViewSet(
     @action(detail=True,
             methods=['POST', 'DELETE'])
     def favorite(self, request, pk=None):
-        return self.post_delete(Favorite, RecipeFollowSerializer,
+        return self.post_delete(Favorite, FavoriteSerializer,
                                 request, pk)
 
     @action(detail=True,
             methods=['POST', 'DELETE'])
     def shopping_cart(self, request, pk=None):
-        return self.post_delete(ShoppingCart, RecipeFollowSerializer,
+        return self.post_delete(ShoppingCart, ShortRecipeSerializer,
                                 request, pk)
 
     @action(detail=False, methods=['GET'])
