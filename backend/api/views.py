@@ -16,7 +16,7 @@ from api.utils import PostDeleteMixin
 from api.permissions import AuthorOrAdminOrReadOnly
 from recipes.models import (Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag, Favorite)
-from api.filters import IngredientFilter, RecipeFilter
+from api.filters import IngredientFilter  # , RecipeFilter
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
