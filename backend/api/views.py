@@ -87,23 +87,24 @@ class RecipeViewSet(
         url_path='download_shopping_cart',
         permission_classes=[IsAuthenticated, ]
     )
-    def download_shopping_cart(self, request):
-        """Скачать список покупок."""
-        user = self.request.user
-        if user.is_anonymous:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+    def download_shopping_cart(request):
+        ingredient_list = "Cписок покупок:"
         ingredients = RecipeIngredient.objects.filter(
             recipe__is_in_shopping_cart__user=request.user
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
-        ).annotate(ingredient_amount=Sum('amount')).values_list(
-            'ingredient__name', 'ingredient__measurement_unit',
-            'ingredient_amount')
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = ('attachment;'
-                                           'filename="Shoppingcart.csv"')
-        response.write(u'\ufeff'.encode('utf8'))
-        writer = csv.writer(response)
-        for item in list(ingredients):
-            writer.writerow(item)
+        ).annotate(amount=Sum('amount'))
+        for num, i in enumerate(ingredients):
+            ingredient_list += (
+                f"\n{i['ingredient__name']} - "
+                f"{i['amount']} {i['ingredient__measurement_unit']}"
+            )
+            if num < ingredients.count() - 1:
+                ingredient_list += ', '
+        file = 'shopping_list'
+        response = HttpResponse(
+            ingredient_list,
+            'Content-Type: application/pdf'
+        )
+        response['Content-Disposition'] = f'attachment; filename="{file}.pdf"'
         return response
