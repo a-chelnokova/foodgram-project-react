@@ -81,18 +81,29 @@ class RecipeViewSet(
 
     @action(detail=False, methods=['GET'])
     def download_shopping_cart(self, request):
-        shopping_ingredients = RecipeIngredient.objects.filter(
-            recipe__shopping_cart__user=request.user
-        ).values("ingredient__name", "ingredient__measurement_unit"
-                 ).annotate(amount=Sum('amount_sum'))
-
-        shopping_cart = '\n'.join([
-            f'{ingredient["ingredients__name"]} - {ingredient["amount_sum"]}'
-            f'{ingredient["ingredients__measurement_unit"]}'
-            for ingredient in shopping_ingredients
-        ])
-
-        response = HttpResponse(shopping_cart, content_type='text/plain')
-        response['Content-Disposition'] = ('attachment; '
-                                           'filename="shopping_cart.txt"')
+        shopping_cart = ShoppingCart.objects.filter(user=request.user).all()
+        shopping_list = {}
+        for item in shopping_cart:
+            for recipe_ingredient in item.recipe.recipe_ingredients.all():
+                name = recipe_ingredient.ingredient.name
+                measuring_unit = recipe_ingredient.ingredient.measurement_unit
+                amount = recipe_ingredient.amount
+                if name not in shopping_list:
+                    shopping_list[name] = {
+                        'name': name,
+                        'measurement_unit': measuring_unit,
+                        'amount': amount
+                    }
+                else:
+                    shopping_list[name]['amount'] += amount
+        content = (
+            [f'{item["name"]} ({item["measurement_unit"]}) '
+            f'- {item["amount"]}\n'
+            for item in shopping_list.values()]
+        )
+        filename = 'shopping_list.txt'
+        response = HttpResponse(content, content_type='text/plain')
+        response['Content-Disposition'] = (
+            'attachment; filename={0}'.format(filename)
+        )
         return response
