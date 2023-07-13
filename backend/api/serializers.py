@@ -7,7 +7,6 @@ from users.serializers import CustomUserSerializer
 # from django.shortcuts import get_object_or_404
 
 
-
 class ShortRecipeSerializer(serializers.ModelSerializer):
     """Укороченный сериализатор для модели Recipe."""
 
