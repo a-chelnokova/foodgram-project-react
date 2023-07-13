@@ -103,8 +103,8 @@ class RecipeViewSet(
                     shopping_list[name]['amount'] += amount
         content = (
             [f'{item["name"]} ({item["measurement_unit"]}) '
-            f'- {item["amount"]}\n'
-            for item in shopping_list.values()]
+             f'- {item["amount"]}\n'
+             for item in shopping_list.values()]
         )
         filename = 'shopping_list.txt'
         response = HttpResponse(content, content_type='text/plain')
