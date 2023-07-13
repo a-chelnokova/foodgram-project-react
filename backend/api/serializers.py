@@ -59,6 +59,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
             'amount',
         ]
 
+
 """
 class AddIngredientSerializer(serializers.ModelSerializer):
 
