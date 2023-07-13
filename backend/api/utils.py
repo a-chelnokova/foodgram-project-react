@@ -92,7 +92,7 @@ def shopping_post(request, pk, model, serializer):
 
 
 def shopping_delete(request, pk, model):
-    """Удаляем рецепт из списка покупко"""
+    """Удаляем рецепт из списка покупок"""
     recipe = get_object_or_404(Recipe, pk=pk)
     if model.objects.filter(user=request.user, recipe=recipe).exists():
         follow = get_object_or_404(model, user=request.user, recipe=recipe)
