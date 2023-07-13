@@ -1,7 +1,6 @@
 import django_filters as filters
 from django_filters import rest_framework as filter
 from django_filters.rest_framework import FilterSet
-
 from recipes.models import Ingredient, Recipe, Tag
 from users.models import CustomUser
 
@@ -11,7 +10,9 @@ class IngredientFilter(FilterSet):
 
     class Meta:
         model = Ingredient
-        fields = ('name',)
+        fields = [
+            'name',
+        ]
 
 
 class RecipeFilter(filter.FilterSet):
@@ -24,10 +25,10 @@ class RecipeFilter(filter.FilterSet):
     )
 
     is_favorited = filter.BooleanFilter(
-        method='filter_is_favorited'
+        method='filter_is_favorited',
     )
     is_in_shopping_cart = filter.BooleanFilter(
-        method='filter_is_in_shopping_cart'
+        method='filter_is_in_shopping_cart',
     )
 
     def filter_is_favorited(self, queryset, name, value):
@@ -48,5 +49,5 @@ class RecipeFilter(filter.FilterSet):
             'tags',
             'author',
             'is_favorited',
-            'is_in_shopping_cart'
+            'is_in_shopping_cart',
         ]
