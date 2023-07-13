@@ -1,7 +1,7 @@
 from django_filters import rest_framework as filter
 from django_filters.rest_framework import FilterSet
 import django_filters as filters
-from recipes.models import Recipe, Tag, Ingredient, Favorite
+from recipes.models import Recipe, Tag, Ingredient
 from users.models import CustomUser
 
 
