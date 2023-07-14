@@ -13,7 +13,10 @@ class PostDeleteMixin:
 
         if request.method == 'POST':
             if model.objects.filter(recipe=recipe, user=user).exists():
-                raise ValidationError('Рецепт уже добавлен')
+                raise Response(
+                    {'errors': 'Рецепт уже добавлен'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             model.objects.create(recipe=recipe, user=user)
             serializer = model_serializer(recipe)
             return Response(
@@ -34,11 +37,13 @@ def subscrib_post(request, id, model, model_user, serializer):
     if model.objects.filter(user=user, author=author).exists():
         return Response(
             {'errors': 'Нельзя подписаться дважды'},
-            status=status.HTTP_400_BAD_REQUEST)
+            status=status.HTTP_400_BAD_REQUEST
+        )
     if user == author:
         return Response(
             {'errors': 'Нельзя подписаться на самого себя'},
-            status=status.HTTP_400_BAD_REQUEST)
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     follow = model.objects.create(user=user, author=author)
     serializer = serializer(follow, context={'request': request})
@@ -54,7 +59,8 @@ def subscrib_delete(request, pk, model, model_user):
     if not model.objects.filter(user=user, author=author).exists():
         return Response(
             {'errors': 'Вы не подписаны'},
-            status=status.HTTP_400_BAD_REQUEST)
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     follow = get_object_or_404(model, user=user, author=author)
     follow.delete()
